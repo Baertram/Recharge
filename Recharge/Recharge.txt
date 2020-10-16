@@ -1,0 +1,18 @@
+## Title: Auto Recharge
+## Author: XanDDemoX, Baertram
+## Version: 2.67
+## AddOnVersion: 267
+## APIVersion: 100032 100033
+## SavedVariables: AutoRecharge_SavedVariables
+## DependsOn: LibAddonMenu-2.0>=31
+
+##Translations
+i18n/en.lua
+i18n/$(language).lua
+## Addon files
+Recharge.lua
+Bag.lua
+Charge.lua
+Repair.lua
+
+Bindings.xml
