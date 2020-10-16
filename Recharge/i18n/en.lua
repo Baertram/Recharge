@@ -38,7 +38,9 @@ local strings = {
 	SI_ARC_LAM_OPTION_SHOW_REPAIR_KITS_LEFT_AT_VENDOR	= "Show repair kits left at vendor",
 	SI_ARC_LAM_OPTION_SHOW_REPAIR_KITS_LEFT_AT_VENDOR_TT= "Shows the repair kits that you got left, if you talk to a vendor, as a small icon with the number of repair kits left next to it.",
 	SI_ARC_LAM_OPTION_USE_REPAIR_KITS_FOR_ITEM_LEVEL	= "Use repair kit for item level",
-	SI_ARC_LAM_OPTION_USE_REPAIR_KITS_FOR_ITEM_LEVEL_TT = "If you own several repair kits the appropriate one will be used for the item's level (e.g. 'grand kit' for CP 160 items)",
+	SI_ARC_LAM_OPTION_USE_REPAIR_KITS_FOR_ITEM_LEVEL_TT = "If you own several repair kits the appropriate one will be used for the item's level (e.g. 'grand kit' for CP 160 items), repairing your item to at least 90% condition",
+	SI_ARC_LAM_OPTION_DO_NOT_USE_CROWN_STORE_REPAIR_KITS= "Don't use crown shop repair kits",
+	SI_ARC_LAM_OPTION_DO_NOT_USE_CROWN_STORE_REPAIR_KITS_TT = "With this setting enabled no crown shop repair kits will be used for automatic repairs.",
 
 	SI_ARC_LAM_OPTION_AUTO_RECHARGE_IN_COMBAT			= "Recharge in combat",
 	SI_ARC_LAM_OPTION_AUTO_RECHARGE_IN_COMBAT_TT		= "Automatically recharge your weapons also during the combat",

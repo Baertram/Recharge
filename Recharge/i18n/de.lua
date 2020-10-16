@@ -38,10 +38,12 @@ local strings = {
 	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_LOGIN	  		= "Zeige \'" .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES406) .. " leer \' nach Anmelden/Reloadui",
 	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_LOGIN_TT		= "Wenn aktiviert wird es dir eine Alarm Meldung nach dem Anmelden/Reloadui zeigen, sofern der Grenzwert erreicht oder unterschritten wird.",
 
-	SI_ARC_LAM_OPTION_SHOW_REPAIR_KITS_LEFT_AT_VENDOR	= "Zeige restl. Reperatursets beim Händler",
-	SI_ARC_LAM_OPTION_SHOW_REPAIR_KITS_LEFT_AT_VENDOR_TT= "Zeigt deine aktuell verbliebenen Reperatursets bei einem Hädnler als kleines Symbol mit der Anzahl daneben an.",
-	SI_ARC_LAM_OPTION_USE_REPAIR_KITS_FOR_ITEM_LEVEL	= "Reperaturset entspricht Level",
-	SI_ARC_LAM_OPTION_USE_REPAIR_KITS_FOR_ITEM_LEVEL_TT = "Sollten verschiedene Reperatursets im Inventar verfügbar sein, so wird das dem zu reparierenden Gegenstand entsprechende verwendet (z.B. 'Groß' für CP160 Rüstung)",
+	SI_ARC_LAM_OPTION_SHOW_REPAIR_KITS_LEFT_AT_VENDOR	= "Zeige restl. Reparatursets beim Händler",
+	SI_ARC_LAM_OPTION_SHOW_REPAIR_KITS_LEFT_AT_VENDOR_TT= "Zeigt deine aktuell verbliebenen Reparatursets bei einem Hädnler als kleines Symbol mit der Anzahl daneben an.",
+	SI_ARC_LAM_OPTION_USE_REPAIR_KITS_FOR_ITEM_LEVEL	= "Reparaturset entspricht Level",
+	SI_ARC_LAM_OPTION_USE_REPAIR_KITS_FOR_ITEM_LEVEL_TT = "Sollten verschiedene Reparatursets im Inventar verfügbar sein, so wird das dem zu reparierenden Gegenstand Level entsprechende verwendet (z.B. 'Groß' für CP160 Rüstung), um den Gegenstand auf mindestens 90% zu reparieren",
+	SI_ARC_LAM_OPTION_DO_NOT_USE_CROWN_STORE_REPAIR_KITS= "Kronen Shop Reparatur Kits nicht verwenden",
+	SI_ARC_LAM_OPTION_DO_NOT_USE_CROWN_STORE_REPAIR_KITS_TT = "Ist diese Option aktiviert, dann werden Reparatursets aus dem Kronen Shop nicht für automatische Reparaturen verwendet.",
 
 	--Chat output messages
 	SI_ARC_CHATOUTPUT_CHARGED							= GetString(SI_ITEMTRAITTYPE2) .. ": ",
