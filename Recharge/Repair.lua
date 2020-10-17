@@ -1,8 +1,21 @@
 local Recharge = Recharge
 
 local function IsItemAboveConditionThreshold(bagId,slotIndex,minPercent)
-	local condition = GetItemCondition(bagId,slotIndex)
-	return (condition / 100) > minPercent,condition
+    if bagId == nil or slotIndex == nil then return end
+--d("[IsItemAboveConditionThreshold]" ..itemLink)
+    --Is an item equipped at this slot? OffHand weapons (2hd) also count as
+    --equipped (slotHAsItem return true! So we need to check the itemLink as well)
+    if bagId == BAG_WORN then
+        local _, slotHasItem = GetEquippedItemInfo(bagId, slotIndex)
+        if not slotHasItem then return true, 100 end
+    end
+    local itemLink = GetItemLink(bagId, slotIndex)
+    if itemLink == nil or itemLink == "" then
+--d("<<ABORT! No itemlink")
+        return true, 100
+    end
+    local condition = GetItemCondition(bagId,slotIndex)
+    return (condition / 100) > minPercent,condition
 end
 
 local function println(...)
@@ -29,14 +42,14 @@ local function tryToUseItem(bagId, slotIndex)
 end
 
 local function RepairItem(bagId,slotIndex,kits,minPercent)
-d("[Recharge]RepairItem")
+--d("[Recharge]RepairItem")
     --Do we have any repair kits?
 	local count = #kits 
-	if count < 1 then return 0, false end
+	if count < 1 then return 0, false, false end
 	--Is the item's condition below the set threshold?
 	local isAbove,condition = IsItemAboveConditionThreshold(bagId,slotIndex,minPercent)
-	if isAbove == true then return 0, false end
-d(">starting repair attempt")
+	if isAbove == true then return 0, false, false end
+--d(">starting repair attempt (min%: " ..tostring(minPercent) .. "/cond: " ..tostring(condition) .."): " .. GetItemLink(bagId,slotIndex))
     --item can be repaired, so find a kit now!
     local amount = 0
     local kitsIndex = #kits or 0
@@ -84,11 +97,12 @@ d(">starting repair attempt")
 		local kit = kits[kitsIndex]
         if kit ~= nil then
 
-d(">foundKit! " ..GetItemLink(kit.bag,kit.index))
+--d(">foundKit! " ..GetItemLink(kit.bag,kit.index))
 
             local oldcondition = condition
             local isCrownStoreRepairKit = (IsItemNonCrownRepairKit(kit.bag,kit.index) == false) or false
             if isCrownStoreRepairKit == true then
+--d(">>crown repair kit")
                 --Crown store repair kit will repair all equipped items to 100%
                 amount = 100
                 --Repair the item with the crown repair kit now, by using it
@@ -120,13 +134,13 @@ d(">foundKit! " ..GetItemLink(kit.bag,kit.index))
                     condition = 100
                 end
                 --Return the difference the repair kit repaired!
-                return (condition-oldcondition), isCrownStoreRepairKit
+                return (condition-oldcondition), isCrownStoreRepairKit, repairKitWasUsed
             end
-            return 0, isCrownStoreRepairKit
+            return 0, isCrownStoreRepairKit, repairKitWasUsed
         end
 	end
 
-	return 0, false
+	return 0, false, false
 end 
 
 local r = {}

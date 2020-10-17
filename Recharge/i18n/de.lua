@@ -29,13 +29,13 @@ local strings = {
 	SI_ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_LOGIN		= "Zeigt \'Reparatursets leer\' nach Anmelden/Reloadui",
 	SI_ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_LOGIN_TT	= "Wenn aktiviert wird es dir eine Alarm Meldung nach dem Anmelden/Reloadui zeigen, sofern der Grenzwert erreicht oder unterschritten wird.",
 	
-	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM				= "Zeigt \'" .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES406) .. " leer\' Meldungen",
-	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_TT			= "Bei leeren " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES406) .. " wird eine Alarm Meldung in der Mitte vom Bildschirm angezeigt",
-	SI_ARC_LAM_OPTION_ALERT_SOON_EMPTY_SOULGEM			= "Zeigt \'" .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES406) .. " gehen bald aus \' Meldungen",
-	SI_ARC_LAM_OPTION_ALERT_SOON_EMPTY_SOULGEM_TT		= "Wenn deine " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES406) .. " knapp werden, wird eine Alarm Meldung in der Mitte vom Bildschirm angezeigt.\n\nSetzte den Grenzwert der Meldung auf der rechten Seite fest!",
+	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM				= "Zeigt \'" .. GetString(SI_ITEMTYPE19) .. " leer\' Meldungen",
+	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_TT			= "Bei leeren " .. GetString(SI_ITEMTYPE19) .. " wird eine Alarm Meldung in der Mitte vom Bildschirm angezeigt",
+	SI_ARC_LAM_OPTION_ALERT_SOON_EMPTY_SOULGEM			= "Zeigt \'" .. GetString(SI_ITEMTYPE19) .. " gehen bald aus \' Meldungen",
+	SI_ARC_LAM_OPTION_ALERT_SOON_EMPTY_SOULGEM_TT		= "Wenn deine " .. GetString(SI_ITEMTYPE19) .. " knapp werden, wird eine Alarm Meldung in der Mitte vom Bildschirm angezeigt.\n\nSetzte den Grenzwert der Meldung auf der rechten Seite fest!",
 	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_TH			= "Grenzwert Meldung",
 	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_TH_TT			= GetString(SI_ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_TH_TT),
-	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_LOGIN	  		= "Zeige \'" .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES406) .. " leer \' nach Anmelden/Reloadui",
+	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_LOGIN	  		= "Zeige \'" .. GetString(SI_ITEMTYPE19) .. " leer \' nach Anmelden/Reloadui",
 	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_LOGIN_TT		= "Wenn aktiviert wird es dir eine Alarm Meldung nach dem Anmelden/Reloadui zeigen, sofern der Grenzwert erreicht oder unterschritten wird.",
 
 	SI_ARC_LAM_OPTION_SHOW_REPAIR_KITS_LEFT_AT_VENDOR	= "Zeige restl. Reparatursets beim Händler",
@@ -62,18 +62,23 @@ local strings = {
     SI_ARC_CHATOUPUT_SETTINGS_DISABLED					= GetString(SI_CHECK_BUTTON_DISABLED),
 
 	SI_ARC_CHATOUPUT_REPAIRKITS_EMPTY_THRESHOLD			= "Grenze leere "  .. GetString(SI_HOOK_POINT_STORE_REPAIR_KIT_HEADER) .. " ",
-    SI_ARC_CHATOUPUT_SOULGEMS_EMPTY_THRESHOLD			= "Grenze leere " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES406) .. ": ",
+    SI_ARC_CHATOUPUT_SOULGEMS_EMPTY_THRESHOLD			= "Grenze leere " .. GetString(SI_ITEMTYPE19) .. ": ",
 
 	SI_ARC_LAM_OPTION_AUTO_RECHARGE_IN_COMBAT			= GetString(SI_CHARGE_WEAPON_TITLE) .. " im Kampf",
 	SI_ARC_LAM_OPTION_AUTO_RECHARGE_IN_COMBAT_TT		= "Automatisch deine Waffen auch im Kampf aufladen",
+	SI_ARC_LAM_OPTION_AUTO_RECHARGE_ON_WEAPON_PAIR_CHANGE		= GetString(SI_CHARGE_WEAPON_TITLE) .. " beim Waffe wechseln",
+	SI_ARC_LAM_OPTION_AUTO_RECHARGE_ON_WEAPON_PAIR_CHANGE_TT	= "Beim Waffen Wechsel diese prüfen und aufladen.",
+	SI_ARC_LAM_OPTION_AUTO_RECHARGE_ON_WEAPON_PAIR_CHANGE_ONLY_IN_COMBAT = "Waffen Wechsel: Nur im Kampf",
+	SI_ARC_LAM_OPTION_AUTO_RECHARGE_ON_WEAPON_PAIR_CHANGE_ONLY_IN_COMBAT_TT = "Führt die " .. GetString(SI_CHARGE_WEAPON_TITLE) .. " Prüfung beim Waffen Wechsel nur im Kampf aus",
+
 	SI_ARC_LAM_OPTION_AUTO_REPAIR_IN_COMBAT				= "Reparieren im Kampf",
 	SI_ARC_LAM_OPTION_AUTO_REPAIR_IN_COMBAT_TT		   	= "Automatisch deine Rüstung auch im Kampf reparieren",
 
 --Alert messages
 	SI_ARC_ALERT_REPAIRKITS_EMPTY						= "Die Reparatursets sind ausgegangen!",
 	SI_ARC_ALERT_REPAIRKITS_SOON_EMPTY					= "Die Reparatursets gehen bald aus! Nur <<C:1>> übrig!",
-	SI_ARC_ALERT_SOULGEMS_EMPTY							= "Die " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES406) .. " sind ausgegangen!",
-	SI_ARC_ALERT_SOULGEMS_SOON_EMPTY					= "Die " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES406) .. " gehen bald aus! Nur <<C:1>> übrig!",
+	SI_ARC_ALERT_SOULGEMS_EMPTY							= "Die " .. GetString(SI_ITEMTYPE19) .. " sind ausgegangen!",
+	SI_ARC_ALERT_SOULGEMS_SOON_EMPTY					= "Die " .. GetString(SI_ITEMTYPE19) .. " gehen bald aus! Nur <<C:1>> übrig!",
 
     --Keybindings
     SI_KEYBINDINGS_CATEGORY_RECHARGE                    = "Auto Recharge",
