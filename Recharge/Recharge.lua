@@ -3,11 +3,14 @@ Recharge = {
     author				= "XanDDemoX, curernt: Baertram",
     name				= "Auto Recharge",
     displayName			= "Auto Recharge",
+	eventName			= "Auto_Recharge",
     website				= "http://www.esoui.com/downloads/info1091-AutoRecharge.html#info",
 	savedVarsName		= "AutoRecharge_SavedVariables",
     savedVarsVersion	= 2.1, --Changing this will reset all SavedVariables!
 }
 Recharge.preChatTextRed = "|cDD2222AutoRecharge|r "
+local eventName = Recharge.eventName
+local PLAYER = "player"
 
 local _repairSlots		= {EQUIP_SLOT_OFF_HAND,EQUIP_SLOT_BACKUP_OFF, EQUIP_SLOT_HEAD, EQUIP_SLOT_SHOULDERS, EQUIP_SLOT_CHEST,EQUIP_SLOT_WAIST, EQUIP_SLOT_LEGS,EQUIP_SLOT_HAND, EQUIP_SLOT_FEET}
 local _rechargeSlots	= {EQUIP_SLOT_MAIN_HAND,EQUIP_SLOT_OFF_HAND,EQUIP_SLOT_BACKUP_MAIN,EQUIP_SLOT_BACKUP_OFF}
@@ -36,6 +39,8 @@ Recharge.defaultSettings = {
     alertSoulGemsSoonEmpty				= false,
     alertSoulGemsSoonEmptyThreshold		= 20,
     alertSoulGemsEmptyOnLogin			= true,
+	chargeOnWeaponChange				= false,
+	chargeOnWeaponChangeOnlyInCombat	= true,
 
 	repairEnabled						= true,
 	repairDuringCombat					= false,
@@ -48,10 +53,20 @@ Recharge.defaultSettings = {
     showRepairKitsLeftAtVendor			= false,
     useRepairKitForItemLevel            = false,
 
+	dontUseCrownRepairKits				= false,
+
     chatOutput							= true,
     chatOutputSuppressNothingMessages	= true,
 }
-Recharge.settings = {}
+
+local function println(...)
+	local args = {...}
+	for i,v in ipairs(args) do
+		args[i] = tostring(v)
+	end
+	table.insert(args,1,_prefix)
+	d(table.concat(args))
+end
 
 local function round(value,places)
 	local s =  10 ^ places
@@ -67,13 +82,8 @@ local function ARC_GetEquipSlotText(slot)
 	return _slotText[slot]
 end
 
-local function println(...)
-	local args = {...}
-	for i,v in ipairs(args) do
-		args[i] = tostring(v)
-	end 
-	table.insert(args,1,_prefix)
-	d(table.concat(args))
+local function ARC_IsPlayerDead()
+	return IsUnitDead(PLAYER)
 end
 
 local function ARC_showAlertMessage(alertType, value)
@@ -104,13 +114,15 @@ local function ARC_checkThresholdOrEmpty(checkType, emptyOrThreshold, amount)
 	if checkType == nil then return false end
     if emptyOrThreshold == nil then return false end
     if amount == nil then return false end
+	local settings = Recharge.settings
+
     if 		checkType == "repairKits" then
     	if emptyOrThreshold then
             if amount == 0 then
 	        	ARC_showAlertMessage("repairKitsEmpty")
             end
         else
-			if amount < Recharge.settings.alertRepairKitsSoonEmptyThreshold then
+			if amount < settings.alertRepairKitsSoonEmptyThreshold then
                 ARC_showAlertMessage("repairKitsSoonEmpty", amount)
             end
         end
@@ -120,7 +132,7 @@ local function ARC_checkThresholdOrEmpty(checkType, emptyOrThreshold, amount)
                 ARC_showAlertMessage("soulGemsEmpty")
             end
         else
-			if amount < Recharge.settings.alertSoulGemsSoonEmptyThreshold then
+			if amount < settings.alertSoulGemsSoonEmptyThreshold then
                 ARC_showAlertMessage("soulGemsSoonEmpty", amount)
             end
         end
@@ -139,10 +151,12 @@ local function ARC_GetSoulGemsCount()
     end
     return gemsCount, gems
 end
+--Recharge.GetSoulGemsCount = ARC_GetSoulGemsCount
 
 local function ARC_GetRepairKitsCount()
     --Get the actual repair kits amount
     local kits = Recharge.Bag.GetRepairKits(BAG_BACKPACK)
+	Recharge.kitsInInventoryBag = kits
     local kitsCount = #kits or 0
     if kitsCount > 0 then
         kitsCount = 0
@@ -152,16 +166,18 @@ local function ARC_GetRepairKitsCount()
     end
     return kitsCount, kits
 end
+--Recharge.GetRepairKitsCount = ARC_GetRepairKitsCount
 
 local function ARC_ChargeEquipped(chatOutput, inCombat, slotIndex)
 	chatOutput = chatOutput or false
+	local settings = Recharge.settings
 
 	local gemsCount, gems = ARC_GetSoulGemsCount()
 	if gemsCount == 0 then
-		if chatOutput and Recharge.settings.alertSoulGemsEmpty  and not Recharge.settings.chatOutputSuppressNothingMessages then
+		if chatOutput and settings.alertSoulGemsEmpty  and not settings.chatOutputSuppressNothingMessages then
 			println(GetString(SI_ARC_ALERT_SOULGEMS_EMPTY))
 		end
-		if not inCombat and Recharge.settings.alertSoulGemsEmpty then
+		if not inCombat and settings.alertSoulGemsEmpty then
             ARC_checkThresholdOrEmpty("soulGems", true, gemsCount)
         end
 		return
@@ -172,14 +188,14 @@ local function ARC_ChargeEquipped(chatOutput, inCombat, slotIndex)
 
 	for i, slot in ipairs(_rechargeSlots) do
 		if slotIndex == nil or (slotIndex ~= nil and slotIndex == slot) then
-			total = Recharge.Charge.ChargeItem(BAG_WORN, slot, gems, Recharge.settings.minChargePercent)
+			total = Recharge.Charge.ChargeItem(BAG_WORN, slot, gems, settings.minChargePercent)
 			if total > 0 and chatOutput then
 				str = (str or GetString(SI_ARC_CHATOUTPUT_CHARGED))..((str and ", ") or "")..ARC_GetEquipSlotText(slot).." ("..tostring(round(total,2)).." %)"
 			end
 		end
 	end
 
-	if str == nil and chatOutput and not Recharge.settings.chatOutputSuppressNothingMessages then
+	if str == nil and chatOutput and not settings.chatOutputSuppressNothingMessages then
 		local charge,maxcharge
 		for i,slot in ipairs(_rechargeSlots) do
 			if slotIndex == nil or (slotIndex ~= nil and slotIndex == slot) then
@@ -193,41 +209,54 @@ local function ARC_ChargeEquipped(chatOutput, inCombat, slotIndex)
 
 	if str ~= nil and chatOutput then
 		println(str)
-	elseif str == nil and chatOutput and not Recharge.settings.chatOutputSuppressNothingMessages then
+	elseif str == nil and chatOutput and not settings.chatOutputSuppressNothingMessages then
 		println(GetString(SI_ARC_CHATOUPUT_NO_CHARGEABLE_WEAPONS))
 	end
 
-	if not inCombat and Recharge.settings.alertSoulGemsSoonEmpty then
+	if not inCombat and settings.alertSoulGemsSoonEmpty then
         ARC_checkThresholdOrEmpty("soulGems", false, gemsCount)
 	end
 end
 
+
 local function ARC_RepairEquipped(chatOutput, inCombat, slotIndex)
+--d("[Recharge]ARC_RepairEquipped")
 	chatOutput = chatOutput or false
+	local settings = Recharge.settings
 
     local kitsCount, kits = ARC_GetRepairKitsCount()
 	if kitsCount == 0 then
-		if chatOutput and Recharge.settings.alertRepairKitsEmpty and not Recharge.settings.chatOutputSuppressNothingMessages then
+		if chatOutput and settings.alertRepairKitsEmpty and not settings.chatOutputSuppressNothingMessages then
 			println(GetString(SI_ARC_ALERT_REPAIRKITS_EMPTY))
 		end
-		if not inCombat and Recharge.settings.alertRepairKitsEmpty then
+		if not inCombat and settings.alertRepairKitsEmpty then
             ARC_checkThresholdOrEmpty("repairKits", true, kitsCount)
         end
 		return
     end
 
 	local total = 0
+	local wasCrownRepairKit = false
+	local kitWasUsed = false
 	local str
 	for i, slot in ipairs(_repairSlots) do
+--d(">>Repair checking slot: " ..tostring(slot) .. " - " ..GetItemLink(BAG_WORN, slot))
 		if slotIndex == nil or (slotIndex ~= nil and slotIndex == slot) then
-			total = Recharge.Repair.RepairItem(BAG_WORN, slot, kits, Recharge.settings.minConditionPercent)
-			if total > 0 and chatOutput then
+			--Crown repair kit already repaird all items, so just output all repaired to 100% and do not try to repair
+			--any further equipped items
+			if wasCrownRepairKit == true and kitWasUsed == true then
+--d(">>>>>crown repair kit was used<<<<<")
+				total, wasCrownRepairKit, kitWasUsed = 100, true, kitWasUsed
+			else
+				total, wasCrownRepairKit, kitWasUsed = Recharge.Repair.RepairItem(BAG_WORN, slot, kits, settings.minConditionPercent)
+			end
+			if total > 0 and kitWasUsed and chatOutput then
 				str = (str or GetString(SI_ARC_CHATOUTPUT_REPAIRED))..((str and ", ") or "")..ARC_GetEquipSlotText(slot).." ("..tostring(round(total,2)).." %)"
 			end
 		end
 	end
 
-	if str == nil and chatOutput and not Recharge.settings.chatOutputSuppressNothingMessages then
+	if str == nil and chatOutput and not settings.chatOutputSuppressNothingMessages then
 		local condition
 		for i, slot in ipairs(_repairSlots) do
 			if slotIndex == nil or (slotIndex ~= nil and slotIndex == slot) then
@@ -239,30 +268,27 @@ local function ARC_RepairEquipped(chatOutput, inCombat, slotIndex)
 
 	if str ~= nil and chatOutput then
 		println(str)
-	elseif str == nil and chatOutput and not Recharge.settings.chatOutputSuppressNothingMessages then
+	elseif str == nil and chatOutput and not settings.chatOutputSuppressNothingMessages then
 		println(GetString(SI_ARC_CHATOUPUT_NO_REPAIRABLE_ARMOR))
 	end
 
-	if not inCombat and Recharge.settings.alertRepairKitsSoonEmpty  then
+	if not inCombat and settings.alertRepairKitsSoonEmpty then
         ARC_checkThresholdOrEmpty("repairKits", false, kitsCount)
 	end
 end
 
-local function ARC_IsPlayerDead()
-	return IsUnitDead("player")
-end
-
 local function ARC_CombatStateChanged(eventCode, inCombat)
 	if ARC_IsPlayerDead() == true then return end
+	local settings = Recharge.settings
+	local chatOutput = settings.chatOutput
 
-	if Recharge.settings.chargeEnabled == true then
-		ARC_ChargeEquipped(Recharge.settings.chatOutput, inCombat)
+	if settings.chargeEnabled == true then
+		ARC_ChargeEquipped(chatOutput, inCombat, nil)
 	end
 
-	if Recharge.settings.repairEnabled == true then
-        ARC_RepairEquipped(Recharge.settings.chatOutput, inCombat)
+	if settings.repairEnabled == true then
+        ARC_RepairEquipped(chatOutput, inCombat, nil)
 	end
-
 end
 
 local function TryParseOnOff(str)
@@ -299,7 +325,7 @@ local function ARC_BuildAddonMenu()
         website 			= Recharge.website,
 	}
 	
-	LAM:RegisterAddonPanel(Recharge.name .. "_LAM", panelData)
+	LAM:RegisterAddonPanel(eventName .. "_LAM", panelData)
 
 	local optionsTable =
     {	-- BEGIN OF OPTIONS TABLE
@@ -356,9 +382,29 @@ local function ARC_BuildAddonMenu()
 	                    if Recharge.settings.chatOutput then println(GetString(SI_ARC_CHATOUPUT_MIN_CHARGE),tostring(percent),"%") end
                     end
  				end,
-            width="half",
+            width="full",
 			default = (Recharge.defaultSettings.minChargePercent*100),
             disabled = function() return not Recharge.settings.chargeEnabled end,
+		},
+		{
+			type = "checkbox",
+			name = GetString(SI_ARC_LAM_OPTION_AUTO_RECHARGE_ON_WEAPON_PAIR_CHANGE),
+			tooltip = GetString(SI_ARC_LAM_OPTION_AUTO_RECHARGE_ON_WEAPON_PAIR_CHANGE_TT),
+			getFunc = function() return Recharge.settings.chargeOnWeaponChange end,
+			setFunc = function(value) Recharge.settings.chargeOnWeaponChange = value end,
+			default = Recharge.defaultSettings.chargeOnWeaponChange,
+			requiresReload = true,
+			width="half",
+		},
+		{
+			type = "checkbox",
+			name = GetString(SI_ARC_LAM_OPTION_AUTO_RECHARGE_ON_WEAPON_PAIR_CHANGE_ONLY_IN_COMBAT),
+			tooltip = GetString(SI_ARC_LAM_OPTION_AUTO_RECHARGE_ON_WEAPON_PAIR_CHANGE_ONLY_IN_COMBAT_TT),
+			getFunc = function() return Recharge.settings.chargeOnWeaponChangeOnlyInCombat end,
+			setFunc = function(value) Recharge.settings.chargeOnWeaponChangeOnlyInCombat = value end,
+			default = Recharge.defaultSettings.chargeOnWeaponChangeOnlyInCombat,
+			disabled = function() return not Recharge.settings.chargeOnWeaponChange end,
+			width="half",
 		},
 		--Automatic repairing
 		{
@@ -418,6 +464,15 @@ local function ARC_BuildAddonMenu()
 			setFunc = function(value) Recharge.settings.useRepairKitForItemLevel = value end,
 			default = Recharge.defaultSettings.useRepairKitForItemLevel,
 			width="half",
+		},
+		{
+			type = "checkbox",
+			name = GetString(SI_ARC_LAM_OPTION_DO_NOT_USE_CROWN_STORE_REPAIR_KITS),
+			tooltip = GetString(SI_ARC_LAM_OPTION_DO_NOT_USE_CROWN_STORE_REPAIR_KITS_TT),
+			getFunc = function() return Recharge.settings.dontUseCrownRepairKits end,
+			setFunc = function(value) Recharge.settings.dontUseCrownRepairKits = value end,
+			default = Recharge.defaultSettings.dontUseCrownRepairKits,
+			width="full",
 		},
 
 		--Chat output
@@ -480,7 +535,7 @@ local function ARC_BuildAddonMenu()
  				end,
             width="half",
 			default = Recharge.defaultSettings.alertRepairKitsSoonEmptyThreshold,
-            disabled = function() return not Recharge.settings.alertRepairKitsSoonEmpty end,
+            disabled = function() return not Recharge.settings.alertRepairKitsSoonEmpty and not Recharge.settings.alertRepairKitsEmptyOnLogin end,
 		},
 		{
 			type = "checkbox",
@@ -523,7 +578,7 @@ local function ARC_BuildAddonMenu()
  				end,
             width="half",
 			default = Recharge.defaultSettings.alertSoulGemsSoonEmptyThreshold,
-            disabled = function() return not Recharge.settings.alertSoulGemsSoonEmpty end,
+            disabled = function() return not Recharge.settings.alertSoulGemsSoonEmpty and not Recharge.settings.alertSoulGemsEmptyOnLogin end,
 		},
 		{
 			type = "checkbox",
@@ -536,7 +591,7 @@ local function ARC_BuildAddonMenu()
 		},
 
     } -- END OF OPTIONS TABLE
-	LAM:RegisterOptionControls(Recharge.name .. "_LAM", optionsTable)
+	LAM:RegisterOptionControls(eventName .. "_LAM", optionsTable)
 
 end
 
@@ -625,7 +680,7 @@ end
 
 local function ARC_Open_Store()
     if Recharge.settings.showRepairKitsLeftAtVendor then
-        local vendorRepairKitsTextureName = Recharge.name .. "_VENDOR_REPAIRKITS"
+        local vendorRepairKitsTextureName = eventName .. "_VENDOR_REPAIRKITS"
         if not Recharge.storeWindowRepairKitsLeftTexture then
             --Recharge.storeWindowRepairKitsLeftTexture, Recharge.storeWindowRepairKitsLeftTextureLabel = ARC_buildAndAnchorTexture(ZO_StoreWindowMenu, vendorRepairKitsTextureName, "esoui/art/icons/quest_crate_001.dds", 48, 48, 1, 1, 1, 1, -345, -38, ZO_StoreWindowMenuBar, TOPLEFT, BOTTOMLEFT, true, nil, RIGHT, RIGHT, 50, 25, 1, 1, 1, 1, 50, 0)
 			Recharge.storeWindowRepairKitsLeftTexture, Recharge.storeWindowRepairKitsLeftTextureLabel = ARC_buildAndAnchorTexture(ZO_StoreWindowMenu, vendorRepairKitsTextureName, "esoui/art/icons/quest_crate_001.dds", 32, 32, 1, 1, 1, 1, -355, 28, ZO_StoreWindowMenuBar, TOPLEFT, BOTTOMLEFT, true, nil, RIGHT, RIGHT, 50, 25, 1, 1, 1, 1, 50, 0)
@@ -660,7 +715,7 @@ local function ARC_Open_Store()
                 Recharge.storeWindowRepairKitsLeftTextureLabel:SetHidden(false)
 
 				--Register the event inventory single slot update for new bought repair kits
-				EVENT_MANAGER:RegisterForEvent(Recharge.name, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ARC_InventorySingleSlotUpdate)
+				EVENT_MANAGER:RegisterForEvent(eventName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ARC_InventorySingleSlotUpdate)
             end
         end
     end
@@ -668,7 +723,7 @@ end
 
 local function ARC_Close_Store()
     --UnRegister the event inventory single slot update for new bought repair kits
-    EVENT_MANAGER:UnregisterForEvent(Recharge.name, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
+    EVENT_MANAGER:UnregisterForEvent(eventName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
     if not Recharge.settings.showRepairKitsLeftAtVendor then
 		if Recharge.storeWindowRepairKitsLeftTexture and not Recharge.storeWindowRepairKitsLeftTexture:IsHidden() then
         	Recharge.storeWindowRepairKitsLeftTexture:SetHidden(true)
@@ -679,10 +734,48 @@ local function ARC_Close_Store()
     end
 end
 
-local function ARC_Initialise()
-	EVENT_MANAGER:RegisterForEvent(Recharge.name,EVENT_PLAYER_COMBAT_STATE,ARC_CombatStateChanged)
-		
+local function LoadSettings()
+	if Recharge.settings then return end
+	Recharge.settings = {}
+
+	--Recharge.settings = ZO_SavedVars:NewCharacterIdSettings(Recharge.savedVarsName, Recharge.savedVarsVersion, "Settings", Recharge.defaultSettings, nil)
+	Recharge.settings = ZO_SavedVars:NewAccountWide(Recharge.savedVarsName, 1, "Settings", Recharge.defaultSettings, GetWorldName())
+	if not Recharge.settings.AccountWide then ZO_SavedVars:NewCharacterIdSettings(Recharge.savedVarsName, Recharge.savedVarsVersion, "Settings", Recharge.defaultSettings, GetWorldName()) end
+end
+
+local function noWornNoDeadNoDuringCombatCheck(bagId, repairOrRechargeDuringCombatSetting)
+	if bagId ~= BAG_WORN or ARC_IsPlayerDead() == true or
+		(repairOrRechargeDuringCombatSetting == false and IsUnitInCombat(PLAYER) == true) then return true end
+	return false
+end
+
+--EVENT_INVENTORY_SINGLE_SLOT_UPDATE: Item charge changed
+-- (number eventCode, Bag bagId, number slotId, boolean isNewItem, ItemUISoundCategory itemSoundCategory, number inventoryUpdateReason, number stackCountChange)
+local function ARC_Charge_Changed(eventCode, bagId, slotIndex)
+--d("[ARC_Charge_Changed]" .. GetItemLink(bagId, slotIndex))
+	local settings = Recharge.settings
+	--Is the setting enabled to check charges and recharge items during combat, and is the item currently worn?
+	if noWornNoDeadNoDuringCombatCheck(bagId, settings.repairDuringCombat) then return end
+	--Check if the item needs to be recharged now
+	ARC_ChargeEquipped(settings.chatOutput, true, slotIndex)
+end
+
+--EVENT_INVENTORY_SINGLE_SLOT_UPDATE: Item durability changed
+-- (number eventCode, Bag bagId, number slotId, boolean isNewItem, ItemUISoundCategory itemSoundCategory, number inventoryUpdateReason, number stackCountChange)
+local function ARC_Durability_Changed(eventCode, bagId, slotIndex)
+	--d("[ARC_Durability_Changed]" .. GetItemLink(bagId, slotIndex))
+	local settings = Recharge.settings
+	--Is the setting enabled to check durability and repair items during combat, and is the item currently worn?
+	if noWornNoDeadNoDuringCombatCheck(bagId, settings.chargeDuringCombat) then return end
+	--Check if the item needs to be repaired now
+	ARC_RepairEquipped(settings.chatOutput, true, slotIndex)
+end
+
+local function ARC_Initialize()
+	EVENT_MANAGER:RegisterForEvent(eventName,EVENT_PLAYER_COMBAT_STATE,ARC_CombatStateChanged)
+
 	SLASH_COMMANDS["/arc"] = function(arg)
+		local settings = Recharge.settings
 		arg = trim(arg)
 		if arg == nil or arg == "" then
 			if ARC_IsPlayerDead() == true then return end
@@ -690,15 +783,15 @@ local function ARC_Initialise()
 		else
 			local percent = TryParsePercent(arg)
 			if percent ~= nil and percent >= 0 and percent < 1 then
-				Recharge.settings.minChargePercent = percent
+				settings.minChargePercent = percent
 				println(GetString(SI_ARC_CHATOUPUT_MIN_CHARGE),tostring(percent * 100),"%")
 			elseif percent ~= nil then
 				println(zo_strformat(GetString(SI_ARC_CHATOUPUT_INVALID_PERCENTAGE), (percent * 100)))
 			else
 				local enabled = TryParseOnOff(arg)
 				if enabled ~= nil then
-					Recharge.settings.chargeEnabled = enabled
-					println(GetString(SI_ARC_CHATOUPUT_CHARGE), ((Recharge.settings.chargeEnabled and GetString(SI_ARC_CHATOUPUT_SETTINGS_ENABLED)) or GetString(SI_ARC_CHATOUPUT_SETTINGS_DISABLED)))
+					settings.chargeEnabled = enabled
+					println(GetString(SI_ARC_CHATOUPUT_CHARGE), ((enabled and GetString(SI_ARC_CHATOUPUT_SETTINGS_ENABLED)) or GetString(SI_ARC_CHATOUPUT_SETTINGS_DISABLED)))
 				end
 			end
 		end
@@ -706,6 +799,7 @@ local function ARC_Initialise()
 	end
 
 	SLASH_COMMANDS["/arp"] = function(arg)
+		local settings = Recharge.settings
 		arg = trim(arg)
 		if arg == nil or arg == "" then
 			if ARC_IsPlayerDead() == true then return end
@@ -714,15 +808,15 @@ local function ARC_Initialise()
 			local percent = TryParsePercent(arg)
 
 			if percent ~= nil and percent >= 0 and percent < 1 then
-				Recharge.settings.minConditionPercent = percent
+				settings.minConditionPercent = percent
 				println(GetString(SI_ARC_CHATOUPUT_MIN_CONDITION),tostring(percent * 100),"%")
 			elseif percent ~= nil then
 				println(zo_strformat(GetString(SI_ARC_CHATOUPUT_INVALID_PERCENTAGE), (percent * 100)))
 			else
 				local enabled = TryParseOnOff(arg)
 				if enabled ~= nil then
-					Recharge.settings.repairEnabled = enabled
-					println(GetString(SI_ARC_CHATOUPUT_REPAIR),((Recharge.settings.repairEnabled and GetString(SI_ARC_CHATOUPUT_SETTINGS_ENABLED)) or GetString(SI_ARC_CHATOUPUT_SETTINGS_DISABLED)))
+					settings.repairEnabled = enabled
+					println(GetString(SI_ARC_CHATOUPUT_REPAIR),((enabled and GetString(SI_ARC_CHATOUPUT_SETTINGS_ENABLED)) or GetString(SI_ARC_CHATOUPUT_SETTINGS_DISABLED)))
 				end
 			end
 
@@ -731,89 +825,77 @@ local function ARC_Initialise()
 
 end
 
-local function ARC_Player_Activated(...)
-	EVENT_MANAGER:UnregisterForEvent(Recharge.name, EVENT_PLAYER_ACTIVATED)
-
-    if Recharge.settings.alertSoulGemsEmptyOnLogin then
-		local gemsCount = ARC_GetSoulGemsCount()
-		if gemsCount == 0 then
-		    ARC_checkThresholdOrEmpty("soulGems", true, gemsCount)
-	    else
-		    ARC_checkThresholdOrEmpty("soulGems", false, gemsCount)
+local function OnActiveWeaponPairChanged(eventId, activeWeaponPair, locked)
+--d("[AutoRecharge]ActiveWeaponPairChanged-activeWeaponPair: " ..tostring(activeWeaponPair) .. ", locked: " ..tostring(locked))
+	if locked then
+		local settings = Recharge.settings
+		if settings.chargeOnWeaponChange == true and ARC_IsPlayerDead() == false then
+			local inCombat = IsUnitInCombat(PLAYER)
+			if not inCombat and settings.chargeOnWeaponChangeOnlyInCombat == true then return end
+			ARC_ChargeEquipped(settings.chatOutput, inCombat, nil)
 		end
+	end
+end
+
+local function ARC_Player_Activated(...)
+	EVENT_MANAGER:UnregisterForEvent(eventName, EVENT_PLAYER_ACTIVATED)
+	local settings = Recharge.settings
+
+	--On a weapon pair change: Recharge checks?
+	if Recharge.settings.chargeOnWeaponChange == true then
+		EVENT_MANAGER:RegisterForEvent(eventName, EVENT_ACTIVE_WEAPON_PAIR_CHANGED, OnActiveWeaponPairChanged)
+	end
+
+    if settings.alertSoulGemsEmptyOnLogin then
+		local gemsCount = ARC_GetSoulGemsCount()
+		ARC_checkThresholdOrEmpty("soulGems", gemsCount == 0, gemsCount)
     end
-    if Recharge.settings.alertRepairKitsEmptyOnLogin then
+    if settings.alertRepairKitsEmptyOnLogin then
 		local kitsCount = ARC_GetRepairKitsCount()
-		if kitsCount == 0 then
-            ARC_checkThresholdOrEmpty("repairKits", true, kitsCount)
-	    else
-            ARC_checkThresholdOrEmpty("repairKits", false, kitsCount)
-	    end
+		ARC_checkThresholdOrEmpty("repairKits", kitsCount == 0, kitsCount)
     end
 end
-
---EVENT_INVENTORY_SINGLE_SLOT_UPDATE: Item durability changed
--- (number eventCode, Bag bagId, number slotId, boolean isNewItem, ItemUISoundCategory itemSoundCategory, number inventoryUpdateReason, number stackCountChange)
-local function ARC_Durability_Changed(eventCode, bagId, slotIndex)
---d("[ARC_Durability_Changed]" .. GetItemLink(bagId, slotIndex))
-	--Is the setting enabled to check durability and repair items during combat, and is the item currently worn?
-	if bagId ~= BAG_WORN or ARC_IsPlayerDead() == true or not Recharge.settings.repairDuringCombat or not IsUnitInCombat("player") == true then return end
-	--Check if the item needs to be repaired now
-	ARC_RepairEquipped(Recharge.settings.chatOutput, true, slotIndex)
-end
-
---EVENT_INVENTORY_SINGLE_SLOT_UPDATE: Item charge changed
--- (number eventCode, Bag bagId, number slotId, boolean isNewItem, ItemUISoundCategory itemSoundCategory, number inventoryUpdateReason, number stackCountChange)
-local function ARC_Charge_Changed(eventCode, bagId, slotIndex)
---d("[ARC_Charge_Changed]" .. GetItemLink(bagId, slotIndex))
-	--Is the setting enabled to check charges and recharge items during combat, and is the item currently worn?
-	if bagId ~= BAG_WORN or ARC_IsPlayerDead() == true or not Recharge.settings.rechargeDuringCombat or not IsUnitInCombat("player") == true then return end
-	--Check if the item needs to be recharged now
-	ARC_ChargeEquipped(Recharge.settings.chatOutput, true, slotIndex)
-end
-
 
 local function ARC_Loaded(eventCode, addOnName)
 	if(addOnName ~= "Recharge") then
         return
     end
 	--Unregister this event again so it isn't fired again after this addon has beend recognized
-    EVENT_MANAGER:UnregisterForEvent(Recharge.name, EVENT_ADD_ON_LOADED)
-    
-	--Recharge.settings = ZO_SavedVars:NewCharacterIdSettings(Recharge.savedVarsName, Recharge.savedVarsVersion, "Settings", Recharge.defaultSettings, nil)
-    Recharge.settings = ZO_SavedVars:NewAccountWide(Recharge.savedVarsName, 1, "Settings", Recharge.defaultSettings, nil)
-    if not Recharge.settings.AccountWide then ZO_SavedVars:NewCharacterIdSettings(Recharge.savedVarsName, Recharge.savedVarsVersion, "Settings", Recharge.defaultSettings, nil) end
-
+    EVENT_MANAGER:UnregisterForEvent(eventName, EVENT_ADD_ON_LOADED)
+	LoadSettings()
     ARC_BuildAddonMenu()
 
-	EVENT_MANAGER:RegisterForEvent(Recharge.name, EVENT_PLAYER_ACTIVATED, ARC_Player_Activated)
+	EVENT_MANAGER:RegisterForEvent(eventName, EVENT_PLAYER_ACTIVATED, ARC_Player_Activated)
     --Register for Store opened & closed
-    EVENT_MANAGER:RegisterForEvent(Recharge.name, EVENT_OPEN_STORE,  ARC_Open_Store)
-    EVENT_MANAGER:RegisterForEvent(Recharge.name, EVENT_CLOSE_STORE, ARC_Close_Store)
+    EVENT_MANAGER:RegisterForEvent(eventName, EVENT_OPEN_STORE,  ARC_Open_Store)
+    EVENT_MANAGER:RegisterForEvent(eventName, EVENT_CLOSE_STORE, ARC_Close_Store)
 
 	--Items changed: Durability
-	EVENT_MANAGER:RegisterForEvent(Recharge.name .. "_INV_UPDATE_REPAIR", 	EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ARC_Durability_Changed)
-	EVENT_MANAGER:AddFilterForEvent(Recharge.name .. "_INV_UPDATE_REPAIR", 	EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DURABILITY_CHANGE)
-	--Items changed: Charged
-	EVENT_MANAGER:RegisterForEvent(Recharge.name .. "_INV_UPDATE_REPAIR", 	EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ARC_Charge_Changed)
-	EVENT_MANAGER:AddFilterForEvent(Recharge.name .. "_INV_UPDATE_REPAIR", 	EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_ITEM_CHARGE)
+	EVENT_MANAGER:RegisterForEvent(eventName .. "_INV_UPDATE_REPAIR", 	EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ARC_Durability_Changed)
+	EVENT_MANAGER:AddFilterForEvent(eventName .. "_INV_UPDATE_REPAIR", 	EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DURABILITY_CHANGE)
+	EVENT_MANAGER:AddFilterForEvent(eventName .. "_INV_UPDATE_REPAIR", 	EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN)
 
-	ARC_Initialise()
+	--Items changed: Charged
+	EVENT_MANAGER:RegisterForEvent(eventName .. "_INV_UPDATE_CHARGE", 	EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ARC_Charge_Changed)
+	EVENT_MANAGER:AddFilterForEvent(eventName .. "_INV_UPDATE_CHARGE", 	EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_ITEM_CHARGE)
+	EVENT_MANAGER:AddFilterForEvent(eventName .. "_INV_UPDATE_CHARGE", 	EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN)
+
+	ARC_Initialize()
 end
 
 --function to trigger the repair via keybind
 function Recharge.Keybind_Repair()
 	if ARC_IsPlayerDead() == false then
-		local inCombat = false
-		ARC_RepairEquipped(Recharge.settings.chatOutput, inCombat, nil)
+		LoadSettings()
+		ARC_RepairEquipped(Recharge.settings.chatOutput, false, nil)
 	end
 end
 
 --function to trigger the recharge via keybind
 function Recharge.Keybind_Recharge()
 	if ARC_IsPlayerDead() == false then
-		local inCombat = false
-		ARC_ChargeEquipped(Recharge.settings.chatOutput, inCombat, nil)
+		LoadSettings()
+		ARC_ChargeEquipped(Recharge.settings.chatOutput, false, nil)
 	end
 end
 
@@ -825,4 +907,4 @@ function Recharge.Triggle_Action()
 	end
 end
 
-EVENT_MANAGER:RegisterForEvent(Recharge.name, EVENT_ADD_ON_LOADED, ARC_Loaded)
+EVENT_MANAGER:RegisterForEvent(eventName, EVENT_ADD_ON_LOADED, ARC_Loaded)

@@ -5,9 +5,9 @@ local function GetBagItems(bagId,func)
 	local cache = SHARED_INVENTORY:GenerateFullSlotData(nil, bagId)
 	local tbl = {}
 	for slotId,data in pairs(cache) do 
-		v = func(data.slotIndex) 
-		if v ~= nil then 
-			table.insert(tbl,v)
+		local funcRes = func(data.slotIndex)
+		if funcRes ~= nil then
+			table.insert(tbl,funcRes)
 		end 
 	end 
 	
@@ -22,7 +22,6 @@ end
 
 local function GetSoulGems(bagId)
 	local tbl = GetBagItems(bagId,function(i)
-
 		if IsItemSoulGem(SOUL_GEM_TYPE_FILLED,bagId,i) == true then
 			return {
 				bag=bagId,
@@ -31,7 +30,6 @@ local function GetSoulGems(bagId)
 				size=getItemStackSize(bagId,i)
 			}
 		end
-		
 	end)
 
 	table.sort(tbl,function(x,y)
@@ -42,15 +40,30 @@ local function GetSoulGems(bagId)
 end
 
 local function GetRepairKits(bagId)
+	--Repair kit tiers
+	--1 =  repair kit lowest
+	--2 =  repair kit lower
+	--3 =  repair kit low
+	--4 =  repair kit medium
+	--5 =  repair kit higher
+	--6 =  repair kit highest
+	--7 =  Crown repair kit
+	--Impressaria group repair kits: Are not counted as repair kits
+	--this IsItemRepairKit returns false and GetRepairKitTier returns 0
+	local dontUseCrownRepairKits = Recharge.settings.dontUseCrownRepairKits
 	local tbl = GetBagItems(bagId,function(i)
-		if IsItemRepairKit(bagId,i) == true then
-			return {
-				bag = bagId,
-				index = i,
-				tier = GetRepairKitTier(bagId,i),
-				size = getItemStackSize(bagId,i)
-			}
-		end 
+		local isRepairKit = IsItemRepairKit(bagId,i)
+		if isRepairKit == true then
+			local isCrownStoreRepairKit = (IsItemNonCrownRepairKit(bagId,i) == false) or false
+			if (isCrownStoreRepairKit == false or (isCrownStoreRepairKit == true and dontUseCrownRepairKits == false)) then
+				return {
+					bag = bagId,
+					index = i,
+					tier = GetRepairKitTier(bagId,i),
+					size = getItemStackSize(bagId,i)
+				}
+			end
+		end
 	end)
 	
 	table.sort(tbl,function(x,y)

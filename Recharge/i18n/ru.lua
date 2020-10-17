@@ -29,13 +29,13 @@ local strings = {
 	SI_ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_LOGIN		= "Показывать предупр. о \'Ремонтных наборах\' при входе/reloadui",
 	SI_ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_LOGIN_TT	= "Если вы входите или используете /reloadui:\nПоказывает на экране предупреждение, если количество ваших ремонтных наборов упадет ниже выбранного порога или уже 0.",
 	
-	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM				= "Показывать предупр. \'" .. GetString(SI_GAMEPLAY_OPTIONS_DEFAULT_SOUL_GEM) .. " нет\'",
+	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM				= "Показывать предупр. \'" .. GetString(SI_ITEMTYPE19) .. " нет\'",
 	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_TT			= "Показывать на экране предупреждение если у вас нет камней душ",
-	SI_ARC_LAM_OPTION_ALERT_SOON_EMPTY_SOULGEM			= "Показывать предупр.\'" .. GetString(SI_GAMEPLAY_OPTIONS_DEFAULT_SOUL_GEM) .. " скоро закончатся \'",
+	SI_ARC_LAM_OPTION_ALERT_SOON_EMPTY_SOULGEM			= "Показывать предупр.\'" .. GetString(SI_ITEMTYPE19) .. " скоро закончатся \'",
 	SI_ARC_LAM_OPTION_ALERT_SOON_EMPTY_SOULGEM_TT		= "Показывает на экране предупреждение, если количество ваших камней душ падает ниже порога.\n\nУстановите свой порог на ползунке справа!",
-	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_TH			=      GetString(SI_GAMEPLAY_OPTIONS_DEFAULT_SOUL_GEM) .. " порог",
+	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_TH			=      GetString(SI_ITEMTYPE19) .. " порог",
 	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_TH_TT			= GetString(SI_ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_TH_TT),
-	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_LOGIN	  		= "Показывать сообщение '" .. GetString(SI_GAMEPLAY_OPTIONS_DEFAULT_SOUL_GEM) .. "' при входе/reloadui",
+	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_LOGIN	  		= "Показывать сообщение '" .. GetString(SI_ITEMTYPE19) .. "' при входе/reloadui",
 	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_LOGIN_TT		= "Если включено, показывает предупреждение после входа/reloadui, если упадет ниже выбранного порога или уже 0.",
 
 	SI_ARC_LAM_OPTION_SHOW_REPAIR_KITS_LEFT_AT_VENDOR	= "      Показать оставшиеся наборы",
@@ -60,7 +60,7 @@ local strings = {
     SI_ARC_CHATOUPUT_SETTINGS_DISABLED					= GetString(SI_CHECK_BUTTON_DISABLED),
 
 	SI_ARC_CHATOUPUT_REPAIRKITS_EMPTY_THRESHOLD			= "Порог "  .. GetString(SI_HOOK_POINT_STORE_REPAIR_KIT_HEADER) .. " ",
-    SI_ARC_CHATOUPUT_SOULGEMS_EMPTY_THRESHOLD			= "Порог " .. GetString(SI_GAMEPLAY_OPTIONS_DEFAULT_SOUL_GEM) .. ": ",
+    SI_ARC_CHATOUPUT_SOULGEMS_EMPTY_THRESHOLD			= "Порог " .. GetString(SI_ITEMTYPE19) .. ": ",
 
 	SI_ARC_LAM_OPTION_AUTO_RECHARGE_IN_COMBAT			= GetString(SI_CHARGE_WEAPON_TITLE) .. " в бою",
 	SI_ARC_LAM_OPTION_AUTO_RECHARGE_IN_COMBAT_TT		= "Автоматически заряжать оружие даже в бою",
@@ -70,8 +70,8 @@ local strings = {
 --Alert messages
 	SI_ARC_ALERT_REPAIRKITS_EMPTY						= "Ремонтные наборы закончились!",
 	SI_ARC_ALERT_REPAIRKITS_SOON_EMPTY					= "Ремонтные наборы скоро закончатся! Только <<C:1>> осталось!",
-	SI_ARC_ALERT_SOULGEMS_EMPTY							= GetString(SI_GAMEPLAY_OPTIONS_DEFAULT_SOUL_GEM) .. " закончились!",
-	SI_ARC_ALERT_SOULGEMS_SOON_EMPTY					= GetString(SI_GAMEPLAY_OPTIONS_DEFAULT_SOUL_GEM) .. " почти закончились! Осталось <<C:1>>!",
+	SI_ARC_ALERT_SOULGEMS_EMPTY							= GetString(SI_ITEMTYPE19) .. " закончились!",
+	SI_ARC_ALERT_SOULGEMS_SOON_EMPTY					= GetString(SI_ITEMTYPE19) .. " почти закончились! Осталось <<C:1>>!",
 
     --Keybindings
     SI_KEYBINDINGS_CATEGORY_RECHARGE                    = "Auto Recharge",

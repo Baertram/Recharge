@@ -27,14 +27,14 @@ local strings = {
 	SI_ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_TH_TT		= "Définissez une valeur entre 1 et 100 kits de réparation. Si vous quittez le combat et que vos kits de réparation tombent en dessous de cette valeur, vous recevrez un message d'alerte à l'écran.",
 	SI_ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_LOGIN		= "Affiche l'alerte 'Kits de réparation' a la co/reco",
 	SI_ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_LOGIN_TT	= "Lorsque vous vous connectez ou effectuez un rechargement:\nAffichez un message d’alerte à l’écran si le montant de vos kits de réparation est inférieur au seuil choisi ou est 0.",
-	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM				= "Afficher '" .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES406) .. " Vide'",
+	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM				= "Afficher '" .. GetString(SI_ITEMTYPE19) .. " Vide'",
 	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_TT			= "Affiche un message d'alerte à l'écran si vos gemmes d'âme sont vides",
-	SI_ARC_LAM_OPTION_ALERT_SOON_EMPTY_SOULGEM			= "Afficher '" .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES406) .. " Bientôt vide'",
+	SI_ARC_LAM_OPTION_ALERT_SOON_EMPTY_SOULGEM			= "Afficher '" .. GetString(SI_ITEMTYPE19) .. " Bientôt vide'",
 	SI_ARC_LAM_OPTION_ALERT_SOON_EMPTY_SOULGEM_TT		= "Affiche un message d'alerte à l'écran si la quantité de vos gemmes d'âme tombe en dessous d'un seuil. \n\nRéglez votre seuil sur le curseur à droite!",
-	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_TH			= GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES406) .. " seuil",
+	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_TH			= GetString(SI_ITEMTYPE19) .. " seuil",
 	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_TH_TT			= "Définissez une valeur entre 1 et 100 gemmes d'âme. Si vous quittez le combat et que vos gemmes d'âme tombent en dessous de cette valeur, vous recevrez un message d'alerte à l'écran.",
-	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_LOGIN	  		= "Afficher '" .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES406) .. "' à la co/reco",
-	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_LOGIN_TT		= "Lorsque vous vous connectez ou effectuez un rechargement:\nAfficher un message d’alerte à l’écran si votre " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES406) .. " le montant tombe en dessous du seuil choisi ou est déjà 0.",
+	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_LOGIN	  		= "Afficher '" .. GetString(SI_ITEMTYPE19) .. "' à la co/reco",
+	SI_ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_LOGIN_TT		= "Lorsque vous vous connectez ou effectuez un rechargement:\nAfficher un message d’alerte à l’écran si votre " .. GetString(SI_ITEMTYPE19) .. " le montant tombe en dessous du seuil choisi ou est déjà 0.",
 	SI_ARC_LAM_OPTION_SHOW_REPAIR_KITS_LEFT_AT_VENDOR	= "Afficher kits de répa laissés au vendeur",
 	SI_ARC_LAM_OPTION_SHOW_REPAIR_KITS_LEFT_AT_VENDOR_TT= "Affiche les kits de réparation qui vous restent, si vous parlez à un vendeur, sous la forme d'une petite icône avec le nombre de kits de réparation restants à côté.",
 	SI_ARC_LAM_OPTION_USE_REPAIR_KITS_FOR_ITEM_LEVEL	= "Utilise un kit pour le niveau d'objet",
@@ -62,13 +62,13 @@ local strings = {
     SI_ARC_CHATOUPUT_SETTINGS_DISABLED					= GetString(SI_CHECK_BUTTON_DISABLED),
 
 	SI_ARC_CHATOUPUT_REPAIRKITS_EMPTY_THRESHOLD			= "Kits de réparation seuil vide: ",
-    SI_ARC_CHATOUPUT_SOULGEMS_EMPTY_THRESHOLD			= GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES406) .." seuil vide: ",
+    SI_ARC_CHATOUPUT_SOULGEMS_EMPTY_THRESHOLD			= GetString(SI_ITEMTYPE19) .." seuil vide: ",
 
 --Alert messages
 	SI_ARC_ALERT_REPAIRKITS_EMPTY						= "Les kits de réparation sont vides!",
 	SI_ARC_ALERT_REPAIRKITS_SOON_EMPTY					= "Les kits de réparation sont bientôt vides! Uniquement <<C:1>> gauche!",
-	SI_ARC_ALERT_SOULGEMS_EMPTY							= GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES406) .. " sont vides!",
-	SI_ARC_ALERT_SOULGEMS_SOON_EMPTY					= GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES406) .. " sont bientôt vides! Uniquement <<C:1>> gauche!",
+	SI_ARC_ALERT_SOULGEMS_EMPTY							= GetString(SI_ITEMTYPE19) .. " sont vides!",
+	SI_ARC_ALERT_SOULGEMS_SOON_EMPTY					= GetString(SI_ITEMTYPE19) .. " sont bientôt vides! Uniquement <<C:1>> gauche!",
 
 --Keybindings
     SI_KEYBINDINGS_CATEGORY_RECHARGE                    = "Auto Recharge",
