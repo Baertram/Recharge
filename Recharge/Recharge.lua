@@ -1,5 +1,5 @@
 Recharge = {
-	version				= "2.67",
+	version				= "2.70",
     author				= "XanDDemoX, curernt: Baertram",
     name				= "Auto Recharge",
     displayName			= "Auto Recharge",
@@ -311,6 +311,9 @@ end
 local LAM = LibAddonMenu2
 if LAM == nil then return end
 
+local serverName = GetWorldName()
+local accountName = GetDisplayName()
+
 local function ARC_BuildAddonMenu()
 
 	local panelData = {
@@ -340,8 +343,8 @@ local function ARC_BuildAddonMenu()
 			type = "checkbox",
 			name = GetString(SI_ARC_LAM_OPTION_ACCOUNTWIDE),
 			tooltip = GetString(SI_ARC_LAM_OPTION_ACCOUNTWIDE_TT),
-			getFunc = function() return AutoRecharge_SavedVariables.Default[GetDisplayName()]['$AccountWide']["Settings"]["AccountWide"] end,
-			setFunc = function(value) AutoRecharge_SavedVariables.Default[GetDisplayName()]['$AccountWide']["Settings"]["AccountWide"] = value end,
+			getFunc = function() return AutoRecharge_SavedVariables[serverName][accountName]['$AccountWide']["Settings"]["AccountWide"] end,
+			setFunc = function(value) AutoRecharge_SavedVariables[serverName][accountName]['$AccountWide']["Settings"]["AccountWide"] = value end,
 			requiresReload = true,
 			default = Recharge.defaultSettings.AccountWide,
 		},
