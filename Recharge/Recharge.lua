@@ -1,5 +1,5 @@
 Recharge = {
-	version				= "2.67",
+	version				= "2.70",
     author				= "XanDDemoX, curernt: Baertram",
     name				= "Auto Recharge",
     displayName			= "Auto Recharge",
@@ -59,6 +59,15 @@ Recharge.defaultSettings = {
     chatOutputSuppressNothingMessages	= true,
 }
 
+local function println(...)
+	local args = {...}
+	for i,v in ipairs(args) do
+		args[i] = tostring(v)
+	end
+	table.insert(args,1,_prefix)
+	d(table.concat(args))
+end
+
 local function round(value,places)
 	local s =  10 ^ places
 	return math.floor(value * s + 0.5) / s
@@ -73,13 +82,8 @@ local function ARC_GetEquipSlotText(slot)
 	return _slotText[slot]
 end
 
-local function println(...)
-	local args = {...}
-	for i,v in ipairs(args) do
-		args[i] = tostring(v)
-	end 
-	table.insert(args,1,_prefix)
-	d(table.concat(args))
+local function ARC_IsPlayerDead()
+	return IsUnitDead(PLAYER)
 end
 
 local function ARC_showAlertMessage(alertType, value)
@@ -273,10 +277,6 @@ local function ARC_RepairEquipped(chatOutput, inCombat, slotIndex)
 	end
 end
 
-local function ARC_IsPlayerDead()
-	return IsUnitDead(PLAYER)
-end
-
 local function ARC_CombatStateChanged(eventCode, inCombat)
 	if ARC_IsPlayerDead() == true then return end
 	local settings = Recharge.settings
@@ -311,6 +311,9 @@ end
 local LAM = LibAddonMenu2
 if LAM == nil then return end
 
+local serverName = GetWorldName()
+local accountName = GetDisplayName()
+
 local function ARC_BuildAddonMenu()
 
 	local panelData = {
@@ -340,8 +343,8 @@ local function ARC_BuildAddonMenu()
 			type = "checkbox",
 			name = GetString(SI_ARC_LAM_OPTION_ACCOUNTWIDE),
 			tooltip = GetString(SI_ARC_LAM_OPTION_ACCOUNTWIDE_TT),
-			getFunc = function() return AutoRecharge_SavedVariables.Default[GetDisplayName()]['$AccountWide']["Settings"]["AccountWide"] end,
-			setFunc = function(value) AutoRecharge_SavedVariables.Default[GetDisplayName()]['$AccountWide']["Settings"]["AccountWide"] = value end,
+			getFunc = function() return AutoRecharge_SavedVariables[serverName][accountName]['$AccountWide']["Settings"]["AccountWide"] end,
+			setFunc = function(value) AutoRecharge_SavedVariables[serverName][accountName]['$AccountWide']["Settings"]["AccountWide"] = value end,
 			requiresReload = true,
 			default = Recharge.defaultSettings.AccountWide,
 		},

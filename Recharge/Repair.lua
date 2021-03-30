@@ -70,7 +70,8 @@ local function RepairItem(bagId,slotIndex,kits,minPercent)
                 local kit = kits[kitsIndex]
                 --println("item level:"..tostring(level).." kit tier:"..tostring(kit.tier))
                 amount = GetAmountRepairKitWouldRepairItem(bagId,slotIndex,kit.bag,kit.index)
-                if (condition + amount >= 90) or ((kit.tier == math.floor(level/10)+1) and amount > 10) then
+                --if (condition + amount >= 90) or ((kit.tier == math.floor(level/10)+1) and amount > 10) then
+                if (kit.tier == math.floor(level/10)+1) and amount > 10 then
                     --Repair kit that would repair 90% was found
                     --It's given via the index kitsIndex!
                     foundKit = true

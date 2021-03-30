@@ -1,10 +1,10 @@
 ## Title: Auto Recharge
 ## Author: XanDDemoX, Baertram
-## Version: 2.67
-## AddOnVersion: 267
-## APIVersion: 100032 100033
+## Version: 2.70
+## AddOnVersion: 270
+## APIVersion: 100034 100035
 ## SavedVariables: AutoRecharge_SavedVariables
-## DependsOn: LibAddonMenu-2.0>=31
+## DependsOn: LibAddonMenu-2.0>=32
 
 ##Translations
 i18n/en.lua
