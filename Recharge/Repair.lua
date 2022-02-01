@@ -1,5 +1,7 @@
 local Recharge = Recharge
 
+local r = {}
+
 local function IsItemAboveConditionThreshold(bagId,slotIndex,minPercent)
     if bagId == nil or slotIndex == nil then return end
 --d("[IsItemAboveConditionThreshold]" ..itemLink)
@@ -43,12 +45,14 @@ end
 
 local function RepairItem(bagId,slotIndex,kits,minPercent)
 --d("[Recharge]RepairItem")
+	if Recharge.IsPlayerDead() then return 0, false, false, true end
+
     --Do we have any repair kits?
 	local count = #kits 
 	if count < 1 then return 0, false, false end
 	--Is the item's condition below the set threshold?
 	local isAbove,condition = IsItemAboveConditionThreshold(bagId,slotIndex,minPercent)
-	if isAbove == true then return 0, false, false end
+	if isAbove == true then return 0, false, false, false end
 --d(">starting repair attempt (min%: " ..tostring(minPercent) .. "/cond: " ..tostring(condition) .."): " .. GetItemLink(bagId,slotIndex))
     --item can be repaired, so find a kit now!
     local amount = 0
@@ -135,16 +139,14 @@ local function RepairItem(bagId,slotIndex,kits,minPercent)
                     condition = 100
                 end
                 --Return the difference the repair kit repaired!
-                return (condition-oldcondition), isCrownStoreRepairKit, repairKitWasUsed
+                return (condition-oldcondition), isCrownStoreRepairKit, repairKitWasUsed, false
             end
-            return 0, isCrownStoreRepairKit, repairKitWasUsed
+            return 0, isCrownStoreRepairKit, repairKitWasUsed, false
         end
 	end
 
-	return 0, false, false
-end 
-
-local r = {}
+	return 0, false, false, false
+end
 
 r.RepairItem = RepairItem
 

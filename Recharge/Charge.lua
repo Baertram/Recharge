@@ -18,6 +18,7 @@ end
 ]]
 
 local function ChargeItem(bagId,slotIndex,gems,minPercent)
+	if Recharge.IsPlayerDead() then return 0, true end
 
 	local gem
 
@@ -26,10 +27,10 @@ local function ChargeItem(bagId,slotIndex,gems,minPercent)
 
 	local isAbove,charge,maxcharge = IsItemAboveThreshold(bagId,slotIndex,minPercent)
 
-	if isAbove == true then return 0 end --or IsItemChargable(bagId,slotIndex) == false then return 0 end
-	
+	if isAbove == true then return 0, false end --or IsItemChargable(bagId,slotIndex) == false then return 0, false end
+
 	local oldcharge = charge
-		
+
 	if gem == nil then
 		gem = gems[#gems]
 	end
@@ -37,24 +38,25 @@ local function ChargeItem(bagId,slotIndex,gems,minPercent)
 	if gem ~= nil then
 
 		local amount = GetAmountSoulGemWouldChargeItem(bagId,slotIndex,gem.bag,gem.index)
-		
+		if amount <= 0 then return 0, false end
+
 		ChargeItemWithSoulGem(bagId,slotIndex,gem.bag,gem.index)
-		
-		gem.size = gem.size - 1 
-		
+
+		gem.size = gem.size - 1
+
 		if gem.size < 1 then
 			table.remove(gems)
 		end
-		
+
 		if (charge + amount) < maxcharge then
 			charge = charge + amount
 		else
 			charge = maxcharge
 		end
-		
+
 	end
-	
-	return ((charge - oldcharge) / maxcharge) * 100
+
+	return ((charge - oldcharge) / maxcharge) * 100, false
 end
 
 local c = {}
