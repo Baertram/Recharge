@@ -48,7 +48,7 @@ local function tryToUseItem(bagId, slotIndex)
 end
 
 local function RepairItem(bagId,slotIndex,kits,minPercent)
-d("[Recharge]RepairItem")
+--d("[Recharge]RepairItem")
 	if isPlayerDead() then return 0, false, false, true end
 
     --Do we have any repair kits?
@@ -105,13 +105,13 @@ d("[Recharge]RepairItem")
 		local kit = kits[kitsIndex]
         if kit ~= nil then
 
-d(">starting repair attempt (min%: " ..tostring(minPercent) .. "/cond: " ..tostring(condition) .."): " .. GetItemLink(bagId,slotIndex))
+--d(">starting repair attempt (min%: " ..tostring(minPercent) .. "/cond: " ..tostring(condition) .."): " .. GetItemLink(bagId,slotIndex))
 --d(">foundKit! " ..GetItemLink(kit.bag,kit.index))
 
             local oldcondition = condition
             local isCrownStoreRepairKit = (IsItemNonCrownRepairKit(kit.bag,kit.index) == false) or false
             if isCrownStoreRepairKit == true then
-d(">>crown repair kit")
+--d(">>crown repair kit")
                 --Crown store repair kit will repair all equipped items to 100%
                 amount = 100
                 --Repair the item with the crown repair kit now, by using it
@@ -127,7 +127,7 @@ d(">>crown repair kit")
                 if not useRepairKitForItemLevel then
                     amount = GetAmountRepairKitWouldRepairItem(bagId,slotIndex,kit.bag,kit.index)
                 end
-d(">>normal repair kit")
+--d(">>normal repair kit")
 
                 if isPlayerDead() then return 0, false, false, true end
                 --Repair the item with the repair kit now
@@ -147,7 +147,7 @@ d(">>normal repair kit")
                 if condition > 100 then
                     condition = 100
                 end
-d(">>repair kit used, amount: " ..tostring(amount) .. ", condition: " ..tostring(condition))
+--d(">>repair kit used, amount: " ..tostring(amount) .. ", condition: " ..tostring(condition))
                 --Return the difference the repair kit repaired!
                 return (condition-oldcondition), isCrownStoreRepairKit, repairKitWasUsed, false
             end

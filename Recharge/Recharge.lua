@@ -89,20 +89,20 @@ local function ARC_GetEquipSlotText(slot)
 	return _slotText[slot]
 end
 
-local function ARC_IsPlayerDead()
-	if isPlayerCurrentlyDead == nil then isPlayerCurrentlyDead = IsUnitDead(PLAYER) end
-	local isPlayerDead = isPlayerCurrentlyDead
+local function ARC_IsPlayerDead(forceUpdate)
+	forceUpdate = forceUpdate or false
+	if isPlayerCurrentlyDead == nil or forceUpdate == true then isPlayerCurrentlyDead = IsUnitDead(PLAYER) end
 	--Fix for IsUnitDead("player") which maybe return false if directly called after/before player dead where the
 	--durability of items change but player is not dead yet.
 	local myCurrentPlayerHealth
-	if not isPlayerDead then
+	if not isPlayerCurrentlyDead then
 		myCurrentPlayerHealth = 0
 		--Check the health of the player, if <= 0 then "player is dead"
 		myCurrentPlayerHealth, _, _ = GetUnitPower(PLAYER, COMBAT_MECHANIC_FLAGS_HEALTH)
-		if myCurrentPlayerHealth <= 0 then isPlayerDead = true end
+		if myCurrentPlayerHealth <= 0 then isPlayerCurrentlyDead = true end
 	end
-d("[ARC]ARC_IsPlayerDead: " .. tostring(isPlayerDead) .. ", playerHealth: " ..tostring(myCurrentPlayerHealth))
-	return isPlayerDead
+--d("[ARC]ARC_IsPlayerDead: " .. tostring(isPlayerCurrentlyDead) .. ", playerHealth: " ..tostring(myCurrentPlayerHealth))
+	return isPlayerCurrentlyDead
 end
 Recharge.IsPlayerDead = ARC_IsPlayerDead
 
@@ -113,10 +113,10 @@ end
 
 local function noWornNoDeadNoDuringCombatCheck(bagId, repairOrRechargeDuringCombatSetting)
 	if bagId ~= BAG_WORN or ARC_IsPlayerDead() == true or noDuringCombatCheck(repairOrRechargeDuringCombatSetting, nil) == true then
-d("<<<<noWornNoDeadNoDuringCombatCheck - true")
+--d("<<<<noWornNoDeadNoDuringCombatCheck - true")
 		return true
 	end
-d("<<<<noWornNoDeadNoDuringCombatCheck - FALSE")
+--d("<<<<noWornNoDeadNoDuringCombatCheck - FALSE")
 	return false
 end
 
@@ -274,13 +274,13 @@ local function ARC_RepairEquipped(chatOutput, inCombat, slotIndex)
 	local settings = Recharge.settings
 
 	local abortedDueToDeath = ARC_IsPlayerDead()
-d("[Recharge]ARC_RepairEquipped-chatOutput: " ..tostring(chatOutput) .. ", inCombat: " ..tostring(inCombat) .. ", abortedDueToDeath: " ..tostring(abortedDueToDeath))
+--d("[Recharge]ARC_RepairEquipped-chatOutput: " ..tostring(chatOutput) .. ", inCombat: " ..tostring(inCombat) .. ", abortedDueToDeath: " ..tostring(abortedDueToDeath))
 	--Do not go on if the player is dead
 	if abortedDueToDeath then return end
 
 	local kitsCount, kits = ARC_GetRepairKitsCount()
 	if kitsCount == 0 then
-		d("<kits count = 0")
+--d("<kits count = 0")
 		if chatOutput and settings.alertRepairKitsEmpty and not settings.chatOutputSuppressNothingMessages then
 			println(GetString(SI_ARC_ALERT_REPAIRKITS_EMPTY))
 		end
@@ -297,15 +297,15 @@ d("[Recharge]ARC_RepairEquipped-chatOutput: " ..tostring(chatOutput) .. ", inCom
 	for i, slot in ipairs(_repairSlots) do
 		--Check if the slot is equipped
 		if HasItemInSlot(BAG_WORN, slot) then
-d(">>Repair checking slot: " ..tostring(slot) .. " - " .. GetItemLink(BAG_WORN, slot))
+--d(">>Repair checking slot: " ..tostring(slot) .. " - " .. GetItemLink(BAG_WORN, slot))
 			if (slotIndex == nil or (slotIndex ~= nil and slotIndex == slot)) then
 				--Crown repair kit already repaird all items, so just output all repaired to 100% and do not try to repair
 				--any further equipped items
 				if wasCrownRepairKit == true and kitWasUsed == true then
-					d(">>>>>crown repair kit to use<<<<<")
+	--d(">>>>>crown repair kit to use<<<<<")
 					total, wasCrownRepairKit, kitWasUsed, abortedDueToDeath = 100, true, kitWasUsed, abortedDueToDeath
 				else
-					d(">>>>>normal repair kit to use<<<<<")
+	--d(">>>>>normal repair kit to use<<<<<")
 					total, wasCrownRepairKit, kitWasUsed, abortedDueToDeath = REPAIR.RepairItem(BAG_WORN, slot, kits, settings.minConditionPercent)
 				end
 				if abortedDueToDeath == false and total > 0 and kitWasUsed and chatOutput then
@@ -346,10 +346,10 @@ d(">>Repair checking slot: " ..tostring(slot) .. " - " .. GetItemLink(BAG_WORN, 
 end
 
 local function ARC_CombatStateChanged(eventCode, inCombat)
-d("=========================================================")
-d("[ARC]CombatStateChanged inCombat: " ..tostring(inCombat))
-	--No repair or recharge if dead
-	isPlayerCurrentlyDead = IsUnitDead(PLAYER)
+--d("=========================================================")
+--d("[ARC]CombatStateChanged inCombat: " ..tostring(inCombat))
+	--No repair or recharge if dead - Get current state by forcing the update
+	isPlayerCurrentlyDead = ARC_IsPlayerDead(true)
 	if isPlayerCurrentlyDead == true then return end
 
 	local settings = Recharge.settings
@@ -368,10 +368,10 @@ d("[ARC]CombatStateChanged inCombat: " ..tostring(inCombat))
 end
 
 local function ARC_DeathStateChanged(isDead)
-d(">>> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-d("[ARC]DeathStateChanged-isDead: " ..tostring(isDead))
+--d(">>> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+--d("[ARC]DeathStateChanged-isDead: " ..tostring(isDead))
 	isPlayerCurrentlyDead = isDead
-d("<<< ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+--d("<<< ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 end
 
 --EVENT_INVENTORY_SINGLE_SLOT_UPDATE: Item charge changed
@@ -392,8 +392,8 @@ end
 --EVENT_INVENTORY_SINGLE_SLOT_UPDATE: Item durability changed
 -- (number eventCode, Bag bagId, number slotId, boolean isNewItem, ItemUISoundCategory itemSoundCategory, number inventoryUpdateReason, number stackCountChange)
 local function ARC_Durability_Changed(eventCode, bagId, slotIndex)
-	d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-	d("[ARC_Durability_Changed]" .. GetItemLink(bagId, slotIndex))
+	--d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+	--d("[ARC_Durability_Changed]" .. GetItemLink(bagId, slotIndex))
 	local settings = Recharge.settings
 	--Fix IsUnitDead("player") where the durabilty changes but the player is not dead -> Repair starts -> Player is dead meanwhile
 	--in system -> server kicks us because of message spamming as we try to repair something while we are dead
@@ -403,7 +403,7 @@ local function ARC_Durability_Changed(eventCode, bagId, slotIndex)
 		--Check if the item needs to be repaired now
 		ARC_RepairEquipped(settings.chatOutput, true, slotIndex)
 	--end, 1000)
-	d("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+	--d("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 end
 
 local function TryParseOnOff(str)
