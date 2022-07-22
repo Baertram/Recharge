@@ -1,5 +1,9 @@
 local Recharge = Recharge
 
+local isPlayerDead = Recharge.IsPlayerDead
+
+local r = {}
+
 local function IsItemAboveConditionThreshold(bagId,slotIndex,minPercent)
     if bagId == nil or slotIndex == nil then return end
 --d("[IsItemAboveConditionThreshold]" ..itemLink)
@@ -18,14 +22,16 @@ local function IsItemAboveConditionThreshold(bagId,slotIndex,minPercent)
     return (condition / 100) > minPercent,condition
 end
 
+--[[
 local function println(...)
 	local args = {...}
 	for i,v in ipairs(args) do
 		args[i] = tostring(v)
 	end 
-	table.insert(args,1,_prefix)
+	table.insert(args,1,_prefix) --_prefix = ???
 	d(table.concat(args))
 end
+]]
 
 local function tryToUseItem(bagId, slotIndex)
     local usable, onlyFromActionSlot = IsItemUsable(bagId, slotIndex)
@@ -42,14 +48,15 @@ local function tryToUseItem(bagId, slotIndex)
 end
 
 local function RepairItem(bagId,slotIndex,kits,minPercent)
---d("[Recharge]RepairItem")
+d("[Recharge]RepairItem")
+	if isPlayerDead() then return 0, false, false, true end
+
     --Do we have any repair kits?
 	local count = #kits 
 	if count < 1 then return 0, false, false end
 	--Is the item's condition below the set threshold?
 	local isAbove,condition = IsItemAboveConditionThreshold(bagId,slotIndex,minPercent)
-	if isAbove == true then return 0, false, false end
---d(">starting repair attempt (min%: " ..tostring(minPercent) .. "/cond: " ..tostring(condition) .."): " .. GetItemLink(bagId,slotIndex))
+	if isAbove == true then return 0, false, false, false end
     --item can be repaired, so find a kit now!
     local amount = 0
     local kitsIndex = #kits or 0
@@ -98,15 +105,18 @@ local function RepairItem(bagId,slotIndex,kits,minPercent)
 		local kit = kits[kitsIndex]
         if kit ~= nil then
 
+d(">starting repair attempt (min%: " ..tostring(minPercent) .. "/cond: " ..tostring(condition) .."): " .. GetItemLink(bagId,slotIndex))
 --d(">foundKit! " ..GetItemLink(kit.bag,kit.index))
 
             local oldcondition = condition
             local isCrownStoreRepairKit = (IsItemNonCrownRepairKit(kit.bag,kit.index) == false) or false
             if isCrownStoreRepairKit == true then
---d(">>crown repair kit")
+d(">>crown repair kit")
                 --Crown store repair kit will repair all equipped items to 100%
                 amount = 100
                 --Repair the item with the crown repair kit now, by using it
+	            if isPlayerDead() then return 0, false, false, true end
+
                 if tryToUseItem(kit.bag,kit.index) == true then
                     repairKitWasUsed = true
                 end
@@ -117,6 +127,9 @@ local function RepairItem(bagId,slotIndex,kits,minPercent)
                 if not useRepairKitForItemLevel then
                     amount = GetAmountRepairKitWouldRepairItem(bagId,slotIndex,kit.bag,kit.index)
                 end
+d(">>normal repair kit")
+
+                if isPlayerDead() then return 0, false, false, true end
                 --Repair the item with the repair kit now
                 RepairItemWithRepairKit(bagId,slotIndex,kit.bag,kit.index)
                 repairKitWasUsed = true
@@ -134,17 +147,16 @@ local function RepairItem(bagId,slotIndex,kits,minPercent)
                 if condition > 100 then
                     condition = 100
                 end
+d(">>repair kit used, amount: " ..tostring(amount) .. ", condition: " ..tostring(condition))
                 --Return the difference the repair kit repaired!
-                return (condition-oldcondition), isCrownStoreRepairKit, repairKitWasUsed
+                return (condition-oldcondition), isCrownStoreRepairKit, repairKitWasUsed, false
             end
-            return 0, isCrownStoreRepairKit, repairKitWasUsed
+            return 0, isCrownStoreRepairKit, repairKitWasUsed, false
         end
 	end
 
-	return 0, false, false
-end 
-
-local r = {}
+	return 0, false, false, false
+end
 
 r.RepairItem = RepairItem
 
