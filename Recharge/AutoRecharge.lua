@@ -26,10 +26,8 @@ local isPlayerCurrentlyDead = Recharge._isPlayerCurrentlyDead
 Recharge._isRepairCurrentlyActive = false
 local isRepairCurrentlyActive = Recharge._isRepairCurrentlyActive
 
-local noChargeChangeEvents = {}
-Recharge.noChargeChangeEvents = noChargeChangeEvents
-local noDurabilityChangeEvents = {}
-Recharge.noDurabilityChangeEvents = noDurabilityChangeEvents
+Recharge.noChargeChangeEvents = {}
+Recharge.noDurabilityChangeEvents = {}
 
 local _repairSlots		= {EQUIP_SLOT_OFF_HAND,EQUIP_SLOT_BACKUP_OFF, EQUIP_SLOT_HEAD, EQUIP_SLOT_SHOULDERS, EQUIP_SLOT_CHEST,EQUIP_SLOT_WAIST, EQUIP_SLOT_LEGS,EQUIP_SLOT_HAND, EQUIP_SLOT_FEET}
 local _rechargeSlots	= {EQUIP_SLOT_MAIN_HAND,EQUIP_SLOT_OFF_HAND,EQUIP_SLOT_BACKUP_MAIN,EQUIP_SLOT_BACKUP_OFF}
@@ -562,8 +560,8 @@ d("[ARC]DeathStateChanged-isDead: " ..tostring(isDead))
 	isPlayerCurrentlyDead = isDead
 	if not isDead then
 		--Reset the "no charge/durability event" slotIndices
-		noChargeChangeEvents = {}
-		noDurabilityChangeEvents = {}
+		Recharge.noChargeChangeEvents = {}
+		Recharge.noDurabilityChangeEvents = {}
 	end
 d("<<< ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 end
@@ -574,8 +572,8 @@ local function ARC_Charge_Changed(eventCode, bagId, slotIndex)
 --d("[ARC_Charge_Changed]" .. GetItemLink(bagId, slotIndex))
 	--Prevent charge change events for slotIndices which recently got charged and where the soul stone usage
 	--triggered the charge change event
-	if noChargeChangeEvents[slotIndex] then
-		noChargeChangeEvents[slotIndex] = nil
+	if Recharge.noChargeChangeEvents[slotIndex] then
+		Recharge.noChargeChangeEvents[slotIndex] = nil
 		return
 	end
 
@@ -601,9 +599,9 @@ d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 d("[ARC_Durability_Changed]" .. GetItemLink(bagId, slotIndex))
 		--Prevent durability change events for slotIndices which recently got repaired and where the repairKit usage
 		--triggered the durability change event
-		if noDurabilityChangeEvents[slotIndex] then
+		if Recharge.noDurabilityChangeEvents[slotIndex] then
 d("<ABORTED - Durablity was changed by repairKit of this addon")
-			noDurabilityChangeEvents[slotIndex] = nil
+			Recharge.noDurabilityChangeEvents[slotIndex] = nil
 			return
 		end
 
@@ -852,8 +850,8 @@ local function ARC_Player_Activated(...)
 	EVENT_MANAGER:UnregisterForEvent(eventName, EVENT_PLAYER_ACTIVATED)
 	local settings = Recharge.settings
 	isPlayerCurrentlyDead = IsUnitDead(PLAYER)
-	noChargeChangeEvents = {}
-	noDurabilityChangeEvents = {}
+	Recharge.noChargeChangeEvents = {}
+	Recharge.noDurabilityChangeEvents = {}
 
 
 	--On a weapon pair change: Recharge checks?

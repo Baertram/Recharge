@@ -48,7 +48,7 @@ local function tryToUseItem(bagId, slotIndex)
 end
 
 local function RepairItem(bagId,slotIndex,kits,minPercent)
-d("[Recharge]RepairItem")
+d("[Recharge]RepairItem - slotIndex: " ..tostring(slotIndex))
 	if isPlayerDead() then return 0, false, false, true end
 
     --Do we have any repair kits?
