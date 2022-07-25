@@ -2,7 +2,7 @@ local Recharge = Recharge
 
 local isPlayerDead = Recharge.IsPlayerDead
 
-local r = {}
+local repair = {}
 
 local function IsItemAboveConditionThreshold(bagId,slotIndex,minPercent)
     if bagId == nil or slotIndex == nil then return end
@@ -48,7 +48,7 @@ local function tryToUseItem(bagId, slotIndex)
 end
 
 local function RepairItem(bagId,slotIndex,kits,minPercent)
---d("[Recharge]RepairItem")
+d("[Recharge]RepairItem")
 	if isPlayerDead() then return 0, false, false, true end
 
     --Do we have any repair kits?
@@ -105,19 +105,23 @@ local function RepairItem(bagId,slotIndex,kits,minPercent)
 		local kit = kits[kitsIndex]
         if kit ~= nil then
 
---d(">starting repair attempt (min%: " ..tostring(minPercent) .. "/cond: " ..tostring(condition) .."): " .. GetItemLink(bagId,slotIndex))
+d(">starting repair attempt (min%: " ..tostring(minPercent) .. "/cond: " ..tostring(condition) .."): " .. GetItemLink(bagId,slotIndex))
 --d(">foundKit! " ..GetItemLink(kit.bag,kit.index))
 
             local oldcondition = condition
             local isCrownStoreRepairKit = (IsItemNonCrownRepairKit(kit.bag,kit.index) == false) or false
             if isCrownStoreRepairKit == true then
---d(">>crown repair kit")
+d(">>crown repair kit")
                 --Crown store repair kit will repair all equipped items to 100%
                 amount = 100
                 --Repair the item with the crown repair kit now, by using it
 	            if isPlayerDead() then return 0, false, false, true end
 
                 if tryToUseItem(kit.bag,kit.index) == true then
+                    -->Attention: This will fire EVENT_INVENTORY_SINGLE_SLOT_UPDATE with INVENTORY_UPDATE_REASON_DURABILITY_CHANGE and
+                    -->AutoRecharge will try to repair the item again then. So we need to set a preventer variable here
+                Recharge.noDurabilityChangeEvents = Recharge.noDurabilityChangeEvents or {}
+                Recharge.noDurabilityChangeEvents[slotIndex] = true
                     repairKitWasUsed = true
                 end
             else
@@ -127,10 +131,14 @@ local function RepairItem(bagId,slotIndex,kits,minPercent)
                 if not useRepairKitForItemLevel then
                     amount = GetAmountRepairKitWouldRepairItem(bagId,slotIndex,kit.bag,kit.index)
                 end
---d(">>normal repair kit")
+d(">>normal repair kit")
 
                 if isPlayerDead() then return 0, false, false, true end
                 --Repair the item with the repair kit now
+                -->Attention: This will fire EVENT_INVENTORY_SINGLE_SLOT_UPDATE with INVENTORY_UPDATE_REASON_DURABILITY_CHANGE and
+                -->AutoRecharge will try to repair the item again then. So we need to set a preventer variable here
+                Recharge.noDurabilityChangeEvents = Recharge.noDurabilityChangeEvents or {}
+                Recharge.noDurabilityChangeEvents[slotIndex] = true
                 RepairItemWithRepairKit(bagId,slotIndex,kit.bag,kit.index)
                 repairKitWasUsed = true
             end
@@ -147,9 +155,10 @@ local function RepairItem(bagId,slotIndex,kits,minPercent)
                 if condition > 100 then
                     condition = 100
                 end
---d(">>repair kit used, amount: " ..tostring(amount) .. ", condition: " ..tostring(condition))
+d(">>repair kit used, amount: " ..tostring(amount) .. ", condition: " ..tostring(condition))
                 --Return the difference the repair kit repaired!
-                return (condition-oldcondition), isCrownStoreRepairKit, repairKitWasUsed, false
+                local repairedCondition = (isCrownStoreRepairKit and condition) or (condition-oldcondition)
+                return repairedCondition, isCrownStoreRepairKit, repairKitWasUsed, false
             end
             return 0, isCrownStoreRepairKit, repairKitWasUsed, false
         end
@@ -158,6 +167,6 @@ local function RepairItem(bagId,slotIndex,kits,minPercent)
 	return 0, false, false, false
 end
 
-r.RepairItem = RepairItem
+repair.RepairItem = RepairItem
 
-Recharge.Repair = r
+Recharge.Repair   = repair

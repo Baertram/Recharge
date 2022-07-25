@@ -9,10 +9,14 @@
 ##Translations
 i18n/en.lua
 i18n/$(language).lua
+
 ## Addon files
-Recharge.lua
+AutoRecharge.lua
+
 Bag.lua
 Charge.lua
 Repair.lua
+
+SettingsMenu.lua
 
 Bindings.xml
