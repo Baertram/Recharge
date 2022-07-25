@@ -457,6 +457,7 @@ d("<< !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 				--Slot to check was checked, abort other slot checks
 				if slotIndex ~= nil then
 		d("<abort loop -> SlotIndex was checked, all other are irrelevant")
+					totalDelay = 0
 					--Reset the "repair run" prevention variable so the next slotIndex check via durabilityChange can happen
 					resetRepair()
 					break
@@ -476,6 +477,7 @@ d(">total delay: " ..tostring(totalDelay))
 		totalDelay = totalDelay + 25 --add a small delay before the chat output
 		--Do the other chat output now
 		zo_callLater(function()
+d(">>0000000000 Delayed chatOutput 0000000000000")
 			--Was a crown store repair kit used?
 			-->Show the chat output for it as it was not done already above!
 			if wasCrownRepairKitUsed then
@@ -506,6 +508,7 @@ d(">>>nothing repaired chat output")
 			elseif chatOutputStr == nil and not chatOutputSuppressNothingMessages then
 				println(GetString(ARC_CHATOUPUT_NO_REPAIRABLE_ARMOR))
 			end
+d("<<0000000000 Delayed chatOutput 0000000000000")
 		end, totalDelay)
 	end
 
@@ -596,20 +599,20 @@ local function ARC_Durability_Changed(eventCode, bagId, slotIndex)
 	zo_callLater(function()
 d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 d("[ARC_Durability_Changed]" .. GetItemLink(bagId, slotIndex))
-	--Prevent durability change events for slotIndices which recently got repaired and where the repairKit usage
-	--triggered the durability change event
-	if noDurabilityChangeEvents[slotIndex] then
+		--Prevent durability change events for slotIndices which recently got repaired and where the repairKit usage
+		--triggered the durability change event
+		if noDurabilityChangeEvents[slotIndex] then
 d("<ABORTED - Durablity was changed by repairKit of this addon")
-		noDurabilityChangeEvents[slotIndex] = nil
-		return
-	end
+			noDurabilityChangeEvents[slotIndex] = nil
+			return
+		end
 
-	local settings = Recharge.settings
-	--Is the setting enabled to check durability and repair items during combat, and is the item currently worn?
-	if not wornNotDeadAndNotInCombatChecks(bagId, settings.repairDuringCombat) then return end
+		local settings = Recharge.settings
+		--Is the setting enabled to check durability and repair items during combat, and is the item currently worn?
+		if not wornNotDeadAndNotInCombatChecks(bagId, settings.repairDuringCombat) then return end
 
-	--Check if the item needs to be repaired now
-	ARC_RepairEquipped(settings.chatOutput, true, slotIndex)
+		--Check if the item needs to be repaired now
+		ARC_RepairEquipped(settings.chatOutput, true, slotIndex)
 	end, 100) --call slightly delayed
 d("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 end
