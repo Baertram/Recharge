@@ -49,14 +49,14 @@ end
 
 local function RepairItem(bagId,slotIndex,kits,minPercent)
 d("[Recharge]RepairItem - slotIndex: " ..tostring(slotIndex))
-	if isPlayerDead() then return 0, false, false, true end
+	if isPlayerDead() then return 0, false, false, true, 0 end
 
     --Do we have any repair kits?
 	local count = #kits 
-	if count < 1 then return 0, false, false end
+	if count < 1 then return 0, false, false, false, 0  end
 	--Is the item's condition below the set threshold?
 	local isAbove,condition = IsItemAboveConditionThreshold(bagId,slotIndex,minPercent)
-	if isAbove == true then return 0, false, false, false end
+	if isAbove == true then return 0, false, false, false, condition end
     --item can be repaired, so find a kit now!
     local amount = 0
     local kitsIndex = #kits or 0
@@ -115,7 +115,7 @@ d(">>crown repair kit")
                 --Crown store repair kit will repair all equipped items to 100%
                 amount = 100
                 --Repair the item with the crown repair kit now, by using it
-	            if isPlayerDead() then return 0, false, false, true end
+	            if isPlayerDead() then return 0, false, false, true, condition end
 
                 if tryToUseItem(kit.bag,kit.index) == true then
                     -->Attention: This will fire EVENT_INVENTORY_SINGLE_SLOT_UPDATE with INVENTORY_UPDATE_REASON_DURABILITY_CHANGE and
@@ -132,7 +132,7 @@ d(">>crown repair kit")
                 end
 d(">>normal repair kit")
 
-                if isPlayerDead() then return 0, false, false, true end
+                if isPlayerDead() then return 0, false, false, true, condition end
                 --Repair the item with the repair kit now
                 -->Attention: This will fire EVENT_INVENTORY_SINGLE_SLOT_UPDATE with INVENTORY_UPDATE_REASON_DURABILITY_CHANGE and
                 -->AutoRecharge will try to repair the item again then. So we need to set a preventer variable here
@@ -155,14 +155,14 @@ d(">>normal repair kit")
                 end
 d(">>repair kit used, amount: " ..tostring(amount) .. ", condition: " ..tostring(condition))
                 --Return the difference the repair kit repaired!
-                local repairedCondition = (isCrownStoreRepairKit and condition) or (condition-oldcondition)
-                return repairedCondition, isCrownStoreRepairKit, repairKitWasUsed, false
+                local repairedAmount = condition-oldcondition
+                return repairedAmount, isCrownStoreRepairKit, repairKitWasUsed, false, condition
             end
-            return 0, isCrownStoreRepairKit, repairKitWasUsed, false
+            return 0, isCrownStoreRepairKit, repairKitWasUsed, false, condition
         end
 	end
 
-	return 0, false, false, false
+	return 0, false, false, false, condition
 end
 
 repair.RepairItem = RepairItem

@@ -353,8 +353,9 @@ d("<<ABORT - Kits count is 0")
 	-->If chat output is enabled the output will be delayed by the total delay needed to repair all + 25 milliseconds
 	-->If a repair attempt is currently done (even if delayed) further more repair attempts are suppressed
 	local total = 0
-	local kitWasUsed            = false
 	local wasCrownRepairKitUsed = false
+	local kitWasUsed            = false
+	local newCondition = 0
 	local chatOutputStr
 
 	local minConditionPercent = settings.minConditionPercent
@@ -378,7 +379,7 @@ d(">> ???????????????????????????????????????")
 d(">>Repair check slot no delay: " ..tostring(slot) .. " - " .. GetItemLink(BAG_WORN, slot))
 						if not wasCrownRepairKitUsed and not abortedDueToDeath then
 							--Prevent the repair try if a crown store repair kit was used already
-							total, wasCrownRepairKitUsed, kitWasUsed, abortedDueToDeath = REPAIR.RepairItem(BAG_WORN, slot, kits, minConditionPercent)
+							total, wasCrownRepairKitUsed, kitWasUsed, abortedDueToDeath, newCondition = REPAIR.RepairItem(BAG_WORN, slot, kits, minConditionPercent)
 							--A repair kit was used?
 							if not abortedDueToDeath and kitWasUsed then
 								--Update the crown repair kit used flag
@@ -396,7 +397,7 @@ d("<<break loop -> Dead")
 							--Chat output needed? Append the output string, but only if no crown repair kit was used.
 							-->Chat output text for crown repair kit usage will be done further down below
 							if not abortedDueToDeath and chatOutput and not wasCrownRepairKitUsed and total > 0 and kitWasUsed then
-								chatOutputStr = (chatOutputStr or GetString(ARC_CHATOUTPUT_REPAIRED))..((chatOutputStr and ", ") or "")..ARC_GetEquipSlotText(slot).." ("..tostring(round(total,2)).." %)"
+								chatOutputStr = (chatOutputStr or GetString(ARC_CHATOUTPUT_REPAIRED))..((chatOutputStr and ", ") or "")..ARC_GetEquipSlotText(slot).." (+"..tostring(round(total,2)).." = " .. tostring(round(newCondition,2)) .. " %)"
 							end
 						else
 d("<<break loop -> Dead or crown repair kit used")
@@ -414,7 +415,7 @@ d(">> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 d(">>Repair check further slot: " ..tostring(slot) .. " - " .. GetItemLink(BAG_WORN, slot))
 							--Prevent the repair try if a crown store repair kit was used already
 							if not wasCrownRepairKitUsed and not abortedDueToDeath then
-								total, wasCrownRepairKitUsed, kitWasUsed, abortedDueToDeath = REPAIR.RepairItem(BAG_WORN, slot, kits, minConditionPercent)
+								total, wasCrownRepairKitUsed, kitWasUsed, abortedDueToDeath, newCondition = REPAIR.RepairItem(BAG_WORN, slot, kits, minConditionPercent)
 								--A repair kit was used?
 								if not abortedDueToDeath and kitWasUsed then
 									--Update the crown repair kit used flag
@@ -437,7 +438,7 @@ d("<<return delayed call -> Dead or crown repair kit used")
 							--Chat output needed? Append the output string, but only if no crown repair kit was used.
 							-->Chat output text for crown repair kit usage will be done further down below
 							if not abortedDueToDeath and chatOutput and not wasCrownRepairKitUsed and total > 0 and kitWasUsed then
-								chatOutputStr = (chatOutputStr or GetString(ARC_CHATOUTPUT_REPAIRED))..((chatOutputStr and ", ") or "")..ARC_GetEquipSlotText(slot).." ("..tostring(round(total,2)).." %)"
+								chatOutputStr = (chatOutputStr or GetString(ARC_CHATOUTPUT_REPAIRED))..((chatOutputStr and ", ") or "")..ARC_GetEquipSlotText(slot).." (+"..tostring(round(total,2)).." = " .. tostring(round(newCondition,2)) .. " %)"
 							end
 d("<< !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 						end, checkNextSlotDelay)
@@ -480,10 +481,10 @@ d(">>0000000000 Delayed chatOutput 0000000000000")
 			-->Show the chat output for it as it was not done already above!
 			if wasCrownRepairKitUsed then
 d(">>>crown repair chat output")
-				chatOutputStr = GetString(ARC_CHATOUTPUT_REPAIRED) .. " " .. GetString(SI_GAMEPAD_REPAIR_ALL_SUCCESS) .. " (100 %)"
+				chatOutputStr = GetString(ARC_CHATOUTPUT_REPAIRED) .. " " .. GetString(SI_GAMEPAD_REPAIR_ALL_SUCCESS) .. " (+100 = 100 %)"
 			end
 
-			--Show nothing repaired chat outout too?
+			--Show nothing repaired chat outpout too?
 			local chatOutputSuppressNothingMessages = settings.chatOutputSuppressNothingMessages
 			if chatOutputStr == nil and not chatOutputSuppressNothingMessages then
 d(">>>nothing repaired chat output")
@@ -492,7 +493,7 @@ d(">>>nothing repaired chat output")
 					if HasItemInSlot(BAG_WORN, slot) then
 						if slotIndex == nil or (slotIndex ~= nil and slotIndex == slot) then
 							condition     = GetItemCondition(BAG_WORN,slot)
-							chatOutputStr = (chatOutputStr or GetString(ARC_CHATOUTPUT_REPAIRED_NOTHING))..((chatOutputStr and ", ") or "")..ARC_GetEquipSlotText(slot).." ("..tostring(round(condition,2)).." %)"
+							chatOutputStr = (chatOutputStr or GetString(ARC_CHATOUTPUT_REPAIRED_NOTHING))..((chatOutputStr and ", ") or "")..ARC_GetEquipSlotText(slot).." (+0 = "..tostring(round(condition,2)).." %)"
 							--Slot to check was found, abort other slot checks
 							if slotIndex ~= nil then break end
 						end
