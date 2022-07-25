@@ -630,6 +630,7 @@ local function TryParsePercent(str)
 	if percent ~= nil and percent >= 0 and percent <= 100 then return (percent / 100) end
 	return nil
 end
+Recharge.TryParsePercent = TryParsePercent
 
 
 

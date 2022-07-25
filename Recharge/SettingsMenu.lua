@@ -8,6 +8,8 @@ local eventName = Recharge.eventName
 local serverName = GetWorldName()
 local accountName = GetDisplayName()
 
+local TryParsePercent = Recharge.TryParsePercent
+
 local function ARC_BuildAddonMenu()
 	--LibAddonMenu-2.0
 	local LAM = LibAddonMenu2
