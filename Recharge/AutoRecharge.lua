@@ -26,10 +26,10 @@ local isPlayerCurrentlyDead = Recharge._isPlayerCurrentlyDead
 Recharge._isRepairCurrentlyActive = false
 local isRepairCurrentlyActive = Recharge._isRepairCurrentlyActive
 
-Recharge.noChargeChangeEvents = {}
-local noChargeChangeEvents = Recharge.noChargeChangeEvents
-Recharge.noDurabilityChangeEvents = {}
-local noDurabilityChangeEvents = Recharge.noDurabilityChangeEvents
+local noChargeChangeEvents = {}
+Recharge.noChargeChangeEvents = noChargeChangeEvents
+local noDurabilityChangeEvents = {}
+Recharge.noDurabilityChangeEvents = noDurabilityChangeEvents
 
 local _repairSlots		= {EQUIP_SLOT_OFF_HAND,EQUIP_SLOT_BACKUP_OFF, EQUIP_SLOT_HEAD, EQUIP_SLOT_SHOULDERS, EQUIP_SLOT_CHEST,EQUIP_SLOT_WAIST, EQUIP_SLOT_LEGS,EQUIP_SLOT_HAND, EQUIP_SLOT_FEET}
 local _rechargeSlots	= {EQUIP_SLOT_MAIN_HAND,EQUIP_SLOT_OFF_HAND,EQUIP_SLOT_BACKUP_MAIN,EQUIP_SLOT_BACKUP_OFF}

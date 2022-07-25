@@ -120,8 +120,7 @@ d(">>crown repair kit")
                 if tryToUseItem(kit.bag,kit.index) == true then
                     -->Attention: This will fire EVENT_INVENTORY_SINGLE_SLOT_UPDATE with INVENTORY_UPDATE_REASON_DURABILITY_CHANGE and
                     -->AutoRecharge will try to repair the item again then. So we need to set a preventer variable here
-                Recharge.noDurabilityChangeEvents = Recharge.noDurabilityChangeEvents or {}
-                Recharge.noDurabilityChangeEvents[slotIndex] = true
+                    Recharge.noDurabilityChangeEvents[slotIndex] = true
                     repairKitWasUsed = true
                 end
             else
@@ -137,7 +136,6 @@ d(">>normal repair kit")
                 --Repair the item with the repair kit now
                 -->Attention: This will fire EVENT_INVENTORY_SINGLE_SLOT_UPDATE with INVENTORY_UPDATE_REASON_DURABILITY_CHANGE and
                 -->AutoRecharge will try to repair the item again then. So we need to set a preventer variable here
-                Recharge.noDurabilityChangeEvents = Recharge.noDurabilityChangeEvents or {}
                 Recharge.noDurabilityChangeEvents[slotIndex] = true
                 RepairItemWithRepairKit(bagId,slotIndex,kit.bag,kit.index)
                 repairKitWasUsed = true
