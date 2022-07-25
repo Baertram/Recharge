@@ -99,6 +99,7 @@ local function println(...)
 	table.insert(args,1,_prefix)
 	d(table.concat(args))
 end
+Recharge.Println = println
 
 local function round(value,places)
 	local s =  10 ^ places

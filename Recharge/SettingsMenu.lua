@@ -9,6 +9,7 @@ local serverName = GetWorldName()
 local accountName = GetDisplayName()
 
 local TryParsePercent = Recharge.TryParsePercent
+local println = Recharge.Println
 
 local function ARC_BuildAddonMenu()
 	--LibAddonMenu-2.0
