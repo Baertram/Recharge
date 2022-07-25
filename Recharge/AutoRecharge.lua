@@ -613,8 +613,8 @@ d("<ABORTED - Durablity was changed by repairKit of this addon")
 
 		--Check if the item needs to be repaired now
 		ARC_RepairEquipped(settings.chatOutput, true, slotIndex)
-	end, 100) --call slightly delayed
 d("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+	end, 100) --call slightly delayed
 end
 
 local function TryParseOnOff(str)
