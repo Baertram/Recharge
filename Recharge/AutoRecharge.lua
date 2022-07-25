@@ -591,6 +591,9 @@ end
 --EVENT_INVENTORY_SINGLE_SLOT_UPDATE: Item durability changed
 -- (number eventCode, Bag bagId, number slotId, boolean isNewItem, ItemUISoundCategory itemSoundCategory, number inventoryUpdateReason, number stackCountChange)
 local function ARC_Durability_Changed(eventCode, bagId, slotIndex)
+	--Fix IsUnitDead("player") where the durabilty changes but the player is not dead -> Repair starts -> Player is dead meanwhile
+	--in system -> server kicks us because of message spamming as we try to repair something while we are dead
+	zo_callLater(function()
 d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 d("[ARC_Durability_Changed]" .. GetItemLink(bagId, slotIndex))
 	--Prevent durability change events for slotIndices which recently got repaired and where the repairKit usage
@@ -602,15 +605,12 @@ d("<ABORTED - Durablity was changed by repairKit of this addon")
 	end
 
 	local settings = Recharge.settings
-	--Fix IsUnitDead("player") where the durabilty changes but the player is not dead -> Repair starts -> Player is dead meanwhile
-	--in system -> server kicks us because of message spamming as we try to repair something while we are dead
-	--zo_callLater(function()
 	--Is the setting enabled to check durability and repair items during combat, and is the item currently worn?
 	if not wornNotDeadAndNotInCombatChecks(bagId, settings.repairDuringCombat) then return end
 
 	--Check if the item needs to be repaired now
 	ARC_RepairEquipped(settings.chatOutput, true, slotIndex)
-	--end, 1000)
+	end, 100) --call slightly delayed
 d("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 end
 
