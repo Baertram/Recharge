@@ -1,7 +1,11 @@
 local Recharge = Recharge
-local Bag = Recharge.Bag
+--local Bag = Recharge.Bag
 
 --local ItemsData = Recharge.ItemsData
+local isPlayerDead = Recharge.IsPlayerDead
+
+local recharge = {}
+
 
 local function IsItemAboveThreshold(bagId,slotIndex,minPercent)
 
@@ -18,7 +22,7 @@ end
 ]]
 
 local function ChargeItem(bagId,slotIndex,gems,minPercent)
-	if Recharge.IsPlayerDead() then return 0, true end
+	if isPlayerDead() then return 0, true end
 
 	local gem
 
@@ -37,9 +41,13 @@ local function ChargeItem(bagId,slotIndex,gems,minPercent)
 
 	if gem ~= nil then
 
+		if isPlayerDead() then return 0, true end
 		local amount = GetAmountSoulGemWouldChargeItem(bagId,slotIndex,gem.bag,gem.index)
 		if amount <= 0 then return 0, false end
 
+		-->Attention: This will fire EVENT_INVENTORY_SINGLE_SLOT_UPDATE with INVENTORY_UPDATE_REASON_ITEM_CHARGE and
+		-->AutoRecharge will try to charge the item again then. So we need to set a preventer variable here
+		Recharge.noChargeChangeEvents[slotIndex] = true
 		ChargeItemWithSoulGem(bagId,slotIndex,gem.bag,gem.index)
 
 		gem.size = gem.size - 1
@@ -59,8 +67,6 @@ local function ChargeItem(bagId,slotIndex,gems,minPercent)
 	return ((charge - oldcharge) / maxcharge) * 100, false
 end
 
-local c = {}
+recharge.ChargeItem = ChargeItem
 
-c.ChargeItem = ChargeItem
-
-Recharge.Charge = c
+Recharge.Charge   = recharge

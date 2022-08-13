@@ -94,11 +94,11 @@ local function GetItemsByType(bagId,types)
 	return tbl
 end
 
-local b = {}
+local rechargeBag          = {}
 
-b.GetBagItems = GetBagItems
-b.GetSoulGems = GetSoulGems
-b.GetRepairKits = GetRepairKits
-b.GetItemsByType = GetItemsByType
+rechargeBag.GetBagItems    = GetBagItems
+rechargeBag.GetSoulGems    = GetSoulGems
+rechargeBag.GetRepairKits  = GetRepairKits
+rechargeBag.GetItemsByType = GetItemsByType
 
-Recharge.Bag = b 
+Recharge.Bag               = rechargeBag

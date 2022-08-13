@@ -1,10 +1,12 @@
 local Recharge = Recharge
 
-local r = {}
+local isPlayerDead = Recharge.IsPlayerDead
+
+local repair = {}
 
 local function IsItemAboveConditionThreshold(bagId,slotIndex,minPercent)
     if bagId == nil or slotIndex == nil then return end
---d("[IsItemAboveConditionThreshold]" ..itemLink)
+--if Recharge.debug then d("[IsItemAboveConditionThreshold]" ..itemLink) end
     --Is an item equipped at this slot? OffHand weapons (2hd) also count as
     --equipped (slotHAsItem return true! So we need to check the itemLink as well)
     if bagId == BAG_WORN then
@@ -13,21 +15,23 @@ local function IsItemAboveConditionThreshold(bagId,slotIndex,minPercent)
     end
     local itemLink = GetItemLink(bagId, slotIndex)
     if itemLink == nil or itemLink == "" then
---d("<<ABORT! No itemlink")
+--if Recharge.debug then if Recharge.debug then d("<<ABORT! No itemlink") end end
         return true, 100
     end
     local condition = GetItemCondition(bagId,slotIndex)
     return (condition / 100) > minPercent,condition
 end
 
+--[[
 local function println(...)
 	local args = {...}
 	for i,v in ipairs(args) do
 		args[i] = tostring(v)
 	end 
-	table.insert(args,1,_prefix)
+	table.insert(args,1,_prefix) --_prefix = ???
 	d(table.concat(args))
 end
+]]
 
 local function tryToUseItem(bagId, slotIndex)
     local usable, onlyFromActionSlot = IsItemUsable(bagId, slotIndex)
@@ -44,16 +48,15 @@ local function tryToUseItem(bagId, slotIndex)
 end
 
 local function RepairItem(bagId,slotIndex,kits,minPercent)
---d("[Recharge]RepairItem")
-	if Recharge.IsPlayerDead() then return 0, false, false, true end
+if Recharge.debug then d("[Recharge]RepairItem - slotIndex: " ..tostring(slotIndex)) end
+	if isPlayerDead() then return 0, false, false, true, 0 end
 
     --Do we have any repair kits?
 	local count = #kits 
-	if count < 1 then return 0, false, false end
+	if count < 1 then return 0, false, false, false, 0  end
 	--Is the item's condition below the set threshold?
 	local isAbove,condition = IsItemAboveConditionThreshold(bagId,slotIndex,minPercent)
-	if isAbove == true then return 0, false, false, false end
---d(">starting repair attempt (min%: " ..tostring(minPercent) .. "/cond: " ..tostring(condition) .."): " .. GetItemLink(bagId,slotIndex))
+	if isAbove == true then return 0, false, false, false, condition end
     --item can be repaired, so find a kit now!
     local amount = 0
     local kitsIndex = #kits or 0
@@ -102,16 +105,22 @@ local function RepairItem(bagId,slotIndex,kits,minPercent)
 		local kit = kits[kitsIndex]
         if kit ~= nil then
 
---d(">foundKit! " ..GetItemLink(kit.bag,kit.index))
+if Recharge.debug then d(">starting repair attempt (min%: " ..tostring(minPercent) .. "/cond: " ..tostring(condition) .."): " .. GetItemLink(bagId,slotIndex))
+    d(">foundKit! " ..GetItemLink(kit.bag,kit.index)) end
 
             local oldcondition = condition
             local isCrownStoreRepairKit = (IsItemNonCrownRepairKit(kit.bag,kit.index) == false) or false
             if isCrownStoreRepairKit == true then
---d(">>crown repair kit")
+if Recharge.debug then d(">>crown repair kit") end
                 --Crown store repair kit will repair all equipped items to 100%
                 amount = 100
                 --Repair the item with the crown repair kit now, by using it
+	            if isPlayerDead() then return 0, false, false, true, condition end
+
                 if tryToUseItem(kit.bag,kit.index) == true then
+                    -->Attention: This will fire EVENT_INVENTORY_SINGLE_SLOT_UPDATE with INVENTORY_UPDATE_REASON_DURABILITY_CHANGE and
+                    -->AutoRecharge will try to repair the item again then. So we need to set a preventer variable here
+                    Recharge.noDurabilityChangeEvents[slotIndex] = true
                     repairKitWasUsed = true
                 end
             else
@@ -121,7 +130,13 @@ local function RepairItem(bagId,slotIndex,kits,minPercent)
                 if not useRepairKitForItemLevel then
                     amount = GetAmountRepairKitWouldRepairItem(bagId,slotIndex,kit.bag,kit.index)
                 end
+if Recharge.debug then d(">>normal repair kit") end
+
+                if isPlayerDead() then return 0, false, false, true, condition end
                 --Repair the item with the repair kit now
+                -->Attention: This will fire EVENT_INVENTORY_SINGLE_SLOT_UPDATE with INVENTORY_UPDATE_REASON_DURABILITY_CHANGE and
+                -->AutoRecharge will try to repair the item again then. So we need to set a preventer variable here
+                Recharge.noDurabilityChangeEvents[slotIndex] = true
                 RepairItemWithRepairKit(bagId,slotIndex,kit.bag,kit.index)
                 repairKitWasUsed = true
             end
@@ -138,16 +153,18 @@ local function RepairItem(bagId,slotIndex,kits,minPercent)
                 if condition > 100 then
                     condition = 100
                 end
+if Recharge.debug then d(">>repair kit used, amount: " ..tostring(amount) .. ", condition: " ..tostring(condition)) end
                 --Return the difference the repair kit repaired!
-                return (condition-oldcondition), isCrownStoreRepairKit, repairKitWasUsed, false
+                local repairedAmount = condition-oldcondition
+                return repairedAmount, isCrownStoreRepairKit, repairKitWasUsed, false, condition
             end
-            return 0, isCrownStoreRepairKit, repairKitWasUsed, false
+            return 0, isCrownStoreRepairKit, repairKitWasUsed, false, condition
         end
 	end
 
-	return 0, false, false, false
+	return 0, false, false, false, condition
 end
 
-r.RepairItem = RepairItem
+repair.RepairItem = RepairItem
 
-Recharge.Repair = r
+Recharge.Repair   = repair
