@@ -541,14 +541,11 @@ if Recharge.debug then d("[ARC]CombatStateChanged inCombat: " ..tostring(inComba
 
 	local settings = Recharge.settings
 	local chatOutput = settings.chatOutput
-	--TODO enable again after debugging
-	--[[
 	if settings.chargeEnabled == true then
 		if duringCombatCheck(settings.chargeDuringCombat, inCombat) then
 			ARC_ChargeEquipped(chatOutput, inCombat, nil)
 		end
 	end
-	]]
 
 	if settings.repairEnabled == true then
 		if duringCombatCheck(settings.repairDuringCombat, inCombat) then
@@ -900,10 +897,9 @@ local function ARC_Loaded(eventCode, addOnName)
 
 	--Items changed: Weapon charge (only worn items)
 	local eventNameCharge = eventName .. eventSuffixCharge
-	--TODO: re-enable after testing if this get#s you kicked too because of message spam!
-	--EVENT_MANAGER:RegisterForEvent(eventNameCharge, 	EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ARC_Charge_Changed)
-	--EVENT_MANAGER:AddFilterForEvent(eventNameCharge, 	EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_ITEM_CHARGE)
-	--EVENT_MANAGER:AddFilterForEvent(eventNameCharge, 	EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN)
+	EVENT_MANAGER:RegisterForEvent(eventNameCharge, 	EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ARC_Charge_Changed)
+	EVENT_MANAGER:AddFilterForEvent(eventNameCharge, 	EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_ITEM_CHARGE)
+	EVENT_MANAGER:AddFilterForEvent(eventNameCharge, 	EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN)
 
 	--Items changed: Durability of repairable items (only worn items)
 	local eventNameRepair = eventName .. eventSuffixRepair
