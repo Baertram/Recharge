@@ -8,9 +8,6 @@ local eventName = Recharge.eventName
 local serverName = GetWorldName()
 local accountName = GetDisplayName()
 
-local TryParsePercent = Recharge.TryParsePercent
-local println = Recharge.Println
-
 local function ARC_BuildAddonMenu()
 	--LibAddonMenu-2.0
 	local LAM = LibAddonMenu2
@@ -70,7 +67,7 @@ local function ARC_BuildAddonMenu()
 			name = GetString(ARC_LAM_OPTION_AUTO_RECHARGE_DELAY),
 			tooltip = GetString(ARC_LAM_OPTION_AUTO_RECHARGE_DELAY_TT),
 			min = 0,
-			max = 2000,
+			max = 1500,
 			step = 10,
 			getFunc = function() return ARC_settings.rechargeDelay end,
 			setFunc = function(value)
@@ -146,7 +143,7 @@ local function ARC_BuildAddonMenu()
 			name = GetString(ARC_LAM_OPTION_AUTO_REPAIR_DELAY),
 			tooltip = GetString(ARC_LAM_OPTION_AUTO_REPAIR_DELAY_TT),
 			min = 0,
-			max = 2000,
+			max = 1500,
 			step = 10,
 			getFunc = function() return ARC_settings.repairDelay end,
 			setFunc = function(value)
@@ -282,6 +279,15 @@ local function ARC_BuildAddonMenu()
             default = ARC_defSettings.alertRepairKitsEmptyOnLogin,
             width="full",
 		},
+		{
+			type = "checkbox",
+			name = GetString(ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_VENDOR),
+			tooltip = GetString(ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_VENDOR_TT),
+			getFunc = function() return ARC_settings.alertRepairKitsEmptyOnVendorOpen end,
+			setFunc = function(value) ARC_settings.alertRepairKitsEmptyOnVendorOpen = value end,
+            default = ARC_defSettings.alertRepairKitsEmptyOnVendorOpen,
+            width="full",
+		},
 
 		{
 			type = "checkbox",
@@ -323,6 +329,21 @@ local function ARC_BuildAddonMenu()
 			getFunc = function() return ARC_settings.alertSoulGemsEmptyOnLogin end,
 			setFunc = function(value) ARC_settings.alertSoulGemsEmptyOnLogin = value end,
             default = ARC_defSettings.alertSoulGemsEmptyOnLogin,
+            width="full",
+		},
+
+		--ODebug mode
+		{
+        	type = "header",
+        	name = "Debug mode",
+        },
+		{
+			type = "checkbox",
+			name = "Debug mode",
+			tooltip = "Debug mode",
+			getFunc = function() return Recharge.debug end,
+			setFunc = function(value) Recharge.debug = value end,
+            default = Recharge.debug,
             width="full",
 		},
 

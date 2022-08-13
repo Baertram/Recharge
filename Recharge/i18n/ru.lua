@@ -28,7 +28,9 @@ local strings = {
 	ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_TH_TT		= "Установите значение от 1 до 100 ремонтных наборов. Если вы выйдете из боя и ваших ремонтных наборов окажется меньше этого значения вы получите на экране предупреждение.",
 	ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_LOGIN		= "Сообщать о \'Рем. наборах\' при входе/reloadui",
 	ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_LOGIN_TT	= "Если вы входите или используете /reloadui:\nПоказывает на экране предупреждение, если количество ваших ремонтных наборов упадет ниже выбранного порога или уже 0.",
-	
+	ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_VENDOR		= "Сообщать о \'Рем. наборах\' у продавца",
+	ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_VENDOR_TT	= "Когда вы взаимодействуете с продавцом:\nПоказывает на экране предупреждение, если количество ваших ремонтных наборов упадет ниже выбранного порога или уже 0.",
+
 	ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM				= "Показывать предупр. \'" .. GetString(SI_ITEMTYPE19) .. " закончились\'",
 	ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_TT			= "Показывать на экране предупреждение если у вас нет камней душ",
 	ARC_LAM_OPTION_ALERT_SOON_EMPTY_SOULGEM			= "Сообщать если \'" .. GetString(SI_ITEMTYPE19) .. " мало\'",

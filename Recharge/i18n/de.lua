@@ -32,7 +32,9 @@ local strings = {
 	ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_TH_TT		= "Wähle einen Wert zwischen 1 und 100 aus. Falls du den Wert erreichst oder unterschreitest, nachdem ein Kampf beendet ist, wird es dir eine Alarm Meldung anzeigen.",
 	ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_LOGIN		= "Zeigt \'Reparatursets leer\' nach Anmelden/Reloadui",
 	ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_LOGIN_TT	= "Wenn aktiviert wird es dir eine Alarm Meldung nach dem Anmelden/Reloadui zeigen, sofern der Grenzwert erreicht oder unterschritten wird.",
-	
+	ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_VENDOR		= "Zeigt \'Reparatursets leer\' beim Händler",
+	ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_VENDOR_TT	= "Wenn aktiviert wird es dir eine Alarm Meldung nach dem öffnen eines Händler Menüs zeigen, sofern der Grenzwert erreicht oder unterschritten wird.",
+
 	ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM				= "Zeigt \'" .. GetString(SI_ITEMTYPE19) .. " leer\' Meldungen",
 	ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_TT			= "Bei leeren " .. GetString(SI_ITEMTYPE19) .. " wird eine Alarm Meldung in der Mitte vom Bildschirm angezeigt",
 	ARC_LAM_OPTION_ALERT_SOON_EMPTY_SOULGEM			= "Zeigt \'" .. GetString(SI_ITEMTYPE19) .. " gehen bald aus \' Meldungen",
