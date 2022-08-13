@@ -377,8 +377,8 @@ if Recharge.debug then d("<<ABORT - Kits count is 0") end
 					--First slot to check?
 					if checkNextSlotDelay == 0 then
 
-if Recharge.debug then d(">> ???????????????????????????????????????") end
-if Recharge.debug then d(">>Repair check slot no delay: " ..tostring(slot) .. " - " .. GetItemLink(BAG_WORN, slot)) end
+if Recharge.debug then d(">> ???????????????????????????????????????")
+	d(">>Repair check slot no delay: " ..tostring(slot) .. " - " .. GetItemLink(BAG_WORN, slot)) end
 						if not wasCrownRepairKitUsed and not abortedDueToDeath then
 							--Prevent the repair try if a crown store repair kit was used already
 							total, wasCrownRepairKitUsed, kitWasUsed, abortedDueToDeath, newCondition = REPAIR.RepairItem(BAG_WORN, slot, kits, minConditionPercent)
@@ -413,8 +413,8 @@ if Recharge.debug then d("<< ???????????????????????????????????????") end
 						--All other further slots to check
 						--Delay each slot check by the milliseconds repair delay chosen in the settings menu
 						zo_callLater(function()
-if Recharge.debug then d(">> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!") end
-if Recharge.debug then d(">>Repair check further slot: " ..tostring(slot) .. " - " .. GetItemLink(BAG_WORN, slot)) end
+if Recharge.debug then d(">> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+		d(">>Repair check further slot: " ..tostring(slot) .. " - " .. GetItemLink(BAG_WORN, slot)) end
 							--Prevent the repair try if a crown store repair kit was used already
 							if not wasCrownRepairKitUsed and not abortedDueToDeath then
 								total, wasCrownRepairKitUsed, kitWasUsed, abortedDueToDeath, newCondition = REPAIR.RepairItem(BAG_WORN, slot, kits, minConditionPercent)
@@ -533,8 +533,8 @@ if Recharge.debug then d(">>delayed call 4 - reset the repair prevention variabl
 end
 
 local function ARC_CombatStateChanged(eventCode, inCombat)
-if Recharge.debug then d("=========================================================") end
-if Recharge.debug then d("[ARC]CombatStateChanged inCombat: " ..tostring(inCombat)) end
+if Recharge.debug then d("=========================================================")
+	d("[ARC]CombatStateChanged inCombat: " ..tostring(inCombat)) end
 	--No repair or recharge if dead - Get current state by forcing the update
 	isPlayerCurrentlyDead = ARC_IsPlayerDead(true)
 	if isPlayerCurrentlyDead == true then return end
@@ -555,8 +555,8 @@ if Recharge.debug then d("[ARC]CombatStateChanged inCombat: " ..tostring(inComba
 end
 
 local function ARC_DeathStateChanged(isDead)
-if Recharge.debug then d(">>> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~") end
-if Recharge.debug then d("[ARC]DeathStateChanged-isDead: " ..tostring(isDead)) end
+if Recharge.debug then d(">>> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+ 	d("[ARC]DeathStateChanged-isDead: " ..tostring(isDead)) end
 	isPlayerCurrentlyDead = isDead
 	if not isDead then
 		--Reset the "no charge/durability event" slotIndices
@@ -578,7 +578,7 @@ local function ARC_Charge_Changed(eventCode, bagId, slotIndex)
 	end
 
 	local settings = Recharge.settings
-	--Fix IsUnitDeaif Recharge.debug then d("player") end where the charge state changes but the player is not dead -> Charge starts -> Player is dead meanwhile
+	--Fix IsUnitDead("player") end where the charge state changes but the player is not dead -> Charge starts -> Player is dead meanwhile
 	--in system -> server kicks us because of message spamming as we try to charge something while we are dead
 	--zo_callLater(function()
 	--Is the setting enabled to check charges and recharge items during combat, and is the item currently worn?
@@ -592,7 +592,7 @@ end
 --EVENT_INVENTORY_SINGLE_SLOT_UPDATE: Item durability changed
 -- (number eventCode, Bag bagId, number slotId, boolean isNewItem, ItemUISoundCategory itemSoundCategory, number inventoryUpdateReason, number stackCountChange)
 local function ARC_Durability_Changed(eventCode, bagId, slotIndex)
-	--Fix IsUnitDeaif Recharge.debug then d("player") end where the durabilty changes but the player is not dead -> Repair starts -> Player is dead meanwhile
+	--Fix IsUnitDead("player") end where the durabilty changes but the player is not dead -> Repair starts -> Player is dead meanwhile
 	--in system -> server kicks us because of message spamming as we try to repair something while we are dead
 	zo_callLater(function()
 if Recharge.debug then d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>") end

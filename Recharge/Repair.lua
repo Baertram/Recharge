@@ -105,8 +105,8 @@ if Recharge.debug then d("[Recharge]RepairItem - slotIndex: " ..tostring(slotInd
 		local kit = kits[kitsIndex]
         if kit ~= nil then
 
-if Recharge.debug then d(">starting repair attempt (min%: " ..tostring(minPercent) .. "/cond: " ..tostring(condition) .."): " .. GetItemLink(bagId,slotIndex)) end
---if Recharge.debug then d(">foundKit! " ..GetItemLink(kit.bag,kit.index)) end
+if Recharge.debug then d(">starting repair attempt (min%: " ..tostring(minPercent) .. "/cond: " ..tostring(condition) .."): " .. GetItemLink(bagId,slotIndex))
+    d(">foundKit! " ..GetItemLink(kit.bag,kit.index)) end
 
             local oldcondition = condition
             local isCrownStoreRepairKit = (IsItemNonCrownRepairKit(kit.bag,kit.index) == false) or false
