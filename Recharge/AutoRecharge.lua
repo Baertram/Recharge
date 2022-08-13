@@ -11,7 +11,7 @@ Recharge = {
 }
 local Recharge = Recharge
 
-Recharg.debug = false
+Recharge.debug = false
 
 Recharge.preChatTextRed = "|cDD2222AutoRecharge|r "
 local eventName = Recharge.eventName
