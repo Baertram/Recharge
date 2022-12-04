@@ -1,6 +1,6 @@
 local addonName = "Auto%sRecharge"
 Recharge = {
-	version				= "2.72",
+	version				= "2.75",
     author				= "XanDDemoX, current: Baertram",
     name				= string.format(addonName, " "),
     displayName			= string.format(addonName, " "),
@@ -101,6 +101,7 @@ local function println(...)
 	table.insert(args,1,_prefix)
 	d(table.concat(args))
 end
+Recharge.Println = println
 
 local function round(value,places)
 	local s =  10 ^ places
@@ -119,7 +120,7 @@ end
 local function ARC_IsPlayerDead(forceUpdate)
 	forceUpdate = forceUpdate or false
 	if isPlayerCurrentlyDead == nil or forceUpdate == true then isPlayerCurrentlyDead = IsUnitDead(PLAYER) end
-	--Fix for IsUnitDeaif Recharge.debug then d("player") end which maybe return false if directly called after/before player dead where the
+	--Fix for IsUnitDead("player") end which maybe return false if directly called after/before player dead where the
 	--durability of items change but player is not dead yet.
 	local myCurrentPlayerHealth
 	local wasDead = isPlayerCurrentlyDead
@@ -149,12 +150,13 @@ end
 --and if the "during combat" checks allow to proceed.
 --returns true if allowed to proceed, false if not allowed
 local function wornNotDeadAndNotInCombatChecks(bagId, repairOrRechargeDuringCombatSetting)
+	local isDebugEnabled = Recharge.debug
 	if bagId ~= BAG_WORN or ARC_IsPlayerDead() == true or
 			duringCombatCheck(repairOrRechargeDuringCombatSetting, nil) == false then
-if Recharge.debug then d("<<<<noWornNoDeadNoDuringCombatCheck - NOT allowed!") end
+if isDebugEnabled then d("<<<<noWornNoDeadNoDuringCombatCheck - NOT allowed!") end
 		return false
 	end
-if Recharge.debug then d("<<<<noWornNoDeadNoDuringCombatCheck - allowed") end
+if isDebugEnabled then d("<<<<noWornNoDeadNoDuringCombatCheck - allowed") end
 	return true
 end
 
@@ -315,19 +317,19 @@ end
 local function ARC_RepairEquipped(chatOutput, inCombat, slotIndex)
 	REPAIR = REPAIR or Recharge.Repair
 	chatOutput = chatOutput or false
-
+	local isDebugEnabled = Recharge.debug
 	--Is the Player dead?
 	local abortedDueToDeath = ARC_IsPlayerDead()
-if Recharge.debug then d("[Recharge]RepairEquipped - isDead: " ..tostring(abortedDueToDeath) .. ", repairActive: " ..tostring(isRepairCurrentlyActive)  .. ", inCombat: " ..tostring(inCombat) ..", slotIndex: " ..tostring(slotIndex) ..", chatOutput: " ..tostring(chatOutput)) end
+if isDebugEnabled then d("[Recharge]RepairEquipped - isDead: " ..tostring(abortedDueToDeath) .. ", repairActive: " ..tostring(isRepairCurrentlyActive)  .. ", inCombat: " ..tostring(inCombat) ..", slotIndex: " ..tostring(slotIndex) ..", chatOutput: " ..tostring(chatOutput)) end
 	--Do not go on if the player is dead
 	if abortedDueToDeath then
-if Recharge.debug then d("<<ABORT - player is dead") end
+if isDebugEnabled then d("<<ABORT - player is dead") end
 		return resetRepair()
 	end
 
 	--Prevent multiple repair runs at the same time!
 	if isRepairCurrentlyActive == true then
-if Recharge.debug then d("<<ABORT - Repair run is active") end
+if isDebugEnabled then d("<<ABORT - Repair run is active") end
 		return
 	end
 	isRepairCurrentlyActive = true
@@ -345,7 +347,7 @@ if Recharge.debug then d("<<ABORT - Repair run is active") end
 				ARC_checkThresholdOrEmpty("repairKits", true, kitsCount)
 			end
 		end
-if Recharge.debug then d("<<ABORT - Kits count is 0") end
+if isDebugEnabled then d("<<ABORT - Kits count is 0") end
 		return resetRepair()
 	end
 
@@ -377,7 +379,7 @@ if Recharge.debug then d("<<ABORT - Kits count is 0") end
 					--First slot to check?
 					if checkNextSlotDelay == 0 then
 
-if Recharge.debug then d(">> ???????????????????????????????????????")
+if isDebugEnabled then d(">> ???????????????????????????????????????")
 	d(">>Repair check slot no delay: " ..tostring(slot) .. " - " .. GetItemLink(BAG_WORN, slot)) end
 						if not wasCrownRepairKitUsed and not abortedDueToDeath then
 							--Prevent the repair try if a crown store repair kit was used already
@@ -386,12 +388,12 @@ if Recharge.debug then d(">> ???????????????????????????????????????")
 							if not abortedDueToDeath and kitWasUsed then
 								--Update the crown repair kit used flag
 								if wasCrownRepairKitUsed then
-if Recharge.debug then d("<<break loop -> Crown repair kit used") end
+if isDebugEnabled then d("<<break loop -> Crown repair kit used") end
 									totalDelay = 0
 									break --leave the loop
 								end
 							elseif abortedDueToDeath then
-if Recharge.debug then d("<<break loop -> Dead") end
+if isDebugEnabled then d("<<break loop -> Dead") end
 								totalDelay = 0
 								break --leave the loop
 							end
@@ -402,18 +404,18 @@ if Recharge.debug then d("<<break loop -> Dead") end
 								chatOutputStr = (chatOutputStr or GetString(ARC_CHATOUTPUT_REPAIRED))..((chatOutputStr and ", ") or "")..ARC_GetEquipSlotText(slot).." (+"..tostring(round(total,2)).." = " .. tostring(round(newCondition,2)) .. " %)"
 							end
 						else
-if Recharge.debug then d("<<break loop -> Dead or crown repair kit used") end
+if isDebugEnabled then d("<<break loop -> Dead or crown repair kit used") end
 							totalDelay = 0
 							break --leave the loop
 						end
-if Recharge.debug then d("<< ???????????????????????????????????????") end
+if isDebugEnabled then d("<< ???????????????????????????????????????") end
 
 					else
 
 						--All other further slots to check
 						--Delay each slot check by the milliseconds repair delay chosen in the settings menu
 						zo_callLater(function()
-if Recharge.debug then d(">> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+if isDebugEnabled then d(">> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 		d(">>Repair check further slot: " ..tostring(slot) .. " - " .. GetItemLink(BAG_WORN, slot)) end
 							--Prevent the repair try if a crown store repair kit was used already
 							if not wasCrownRepairKitUsed and not abortedDueToDeath then
@@ -422,17 +424,17 @@ if Recharge.debug then d(">> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 								if not abortedDueToDeath and kitWasUsed then
 									--Update the crown repair kit used flag
 									if wasCrownRepairKitUsed then
-if Recharge.debug then d("<<return delayed call -> Crown repair kit used") end
+if isDebugEnabled then d("<<return delayed call -> Crown repair kit used") end
 										totalDelay = 0
 										return --end zo_callLater function
 									end
 								elseif abortedDueToDeath then
-if Recharge.debug then d("<<return delayed call -> Dead") end
+if isDebugEnabled then d("<<return delayed call -> Dead") end
 									totalDelay = 0
 									return --end zo_callLater function
 								end
 							else
-if Recharge.debug then d("<<return delayed call -> Dead or crown repair kit used") end
+if isDebugEnabled then d("<<return delayed call -> Dead or crown repair kit used") end
 								totalDelay = 0
 								return --end zo_callLater function
 							end
@@ -442,7 +444,7 @@ if Recharge.debug then d("<<return delayed call -> Dead or crown repair kit used
 							if not abortedDueToDeath and chatOutput and not wasCrownRepairKitUsed and total > 0 and kitWasUsed then
 								chatOutputStr = (chatOutputStr or GetString(ARC_CHATOUTPUT_REPAIRED))..((chatOutputStr and ", ") or "")..ARC_GetEquipSlotText(slot).." (+"..tostring(round(total,2)).." = " .. tostring(round(newCondition,2)) .. " %)"
 							end
-if Recharge.debug then d("<< !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!") end
+if isDebugEnabled then d("<< !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!") end
 						end, checkNextSlotDelay)
 
 					end
@@ -457,7 +459,7 @@ if Recharge.debug then d("<< !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!") end
 
 				--Slot to check was checked, abort other slot checks
 				if slotIndex ~= nil then
-		if Recharge.debug then d("<abort loop -> SlotIndex was checked, all other are irrelevant") end
+		if isDebugEnabled then d("<abort loop -> SlotIndex was checked, all other are irrelevant") end
 					totalDelay = 0
 					--Reset the "repair run" prevention variable so the next slotIndex check via durabilityChange can happen
 					resetRepair()
@@ -465,31 +467,32 @@ if Recharge.debug then d("<< !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!") end
 				end
 			end
 		else
-if Recharge.debug then d("<abort loop -> Crown repair kit used or dead") end
+if isDebugEnabled then d("<abort loop -> Crown repair kit used or dead") end
 			totalDelay = 0
 			break -- crown repait kit has repaired all already or the player is dead meawhile, abort the loop
 		end
 	end
 
-if Recharge.debug then d(">total delay: " ..tostring(totalDelay)) end
+if isDebugEnabled then d(">total delay: " ..tostring(totalDelay)) end
 
 	--Prepare the chat output by checking all worn equipment's condition now, after the total repair delay was waited
 	if chatOutput == true then
 		totalDelay = totalDelay + 25 --add a small delay before the chat output
 		--Do the other chat output now
 		zo_callLater(function()
-if Recharge.debug then d(">>0000000000 Delayed chatOutput 0000000000000") end
+			local isDebugEnabled = Recharge.debug
+if isDebugEnabled then d(">>0000000000 Delayed chatOutput 0000000000000") end
 			--Was a crown store repair kit used?
 			-->Show the chat output for it as it was not done already above!
 			if wasCrownRepairKitUsed then
-if Recharge.debug then d(">>>crown repair chat output") end
+if isDebugEnabled then d(">>>crown repair chat output") end
 				chatOutputStr = GetString(ARC_CHATOUTPUT_REPAIRED) .. " " .. GetString(SI_GAMEPAD_REPAIR_ALL_SUCCESS) .. " (+100 = 100 %)"
 			end
 
 			--Show nothing repaired chat outpout too?
 			local chatOutputSuppressNothingMessages = settings.chatOutputSuppressNothingMessages
 			if chatOutputStr == nil and not chatOutputSuppressNothingMessages then
-if Recharge.debug then d(">>>nothing repaired chat output") end
+if isDebugEnabled then d(">>>nothing repaired chat output") end
 				local condition
 				for _, slot in ipairs(_repairSlots) do
 					if HasItemInSlot(BAG_WORN, slot) then
@@ -509,7 +512,7 @@ if Recharge.debug then d(">>>nothing repaired chat output") end
 			elseif chatOutputStr == nil and not chatOutputSuppressNothingMessages then
 				println(GetString(ARC_CHATOUPUT_NO_REPAIRABLE_ARMOR))
 			end
-if Recharge.debug then d("<<0000000000 Delayed chatOutput 0000000000000") end
+if isDebugEnabled then d("<<0000000000 Delayed chatOutput 0000000000000") end
 		end, totalDelay)
 	end
 
@@ -555,7 +558,8 @@ if Recharge.debug then d("======================================================
 end
 
 local function ARC_DeathStateChanged(isDead)
-if Recharge.debug then d(">>> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+local isDebugEnabled = Recharge.debug
+if isDebugEnabled then d(">>> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
  	d("[ARC]DeathStateChanged-isDead: " ..tostring(isDead)) end
 	isPlayerCurrentlyDead = isDead
 	if not isDead then
@@ -563,13 +567,13 @@ if Recharge.debug then d(">>> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 		Recharge.noChargeChangeEvents = {}
 		Recharge.noDurabilityChangeEvents = {}
 	end
-if Recharge.debug then d("<<< ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~") end
+if isDebugEnabled then d("<<< ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~") end
 end
 
 --EVENT_INVENTORY_SINGLE_SLOT_UPDATE: Item charge changed
 -- (number eventCode, Bag bagId, number slotId, boolean isNewItem, ItemUISoundCategory itemSoundCategory, number inventoryUpdateReason, number stackCountChange)
 local function ARC_Charge_Changed(eventCode, bagId, slotIndex)
---if Recharge.debug then d("[ARC_Charge_Changed]" .. GetItemLink(bagId, slotIndex)) end
+	if Recharge.debug then d("[ARC_Charge_Changed]" .. GetItemLink(bagId, slotIndex)) end
 	--Prevent charge change events for slotIndices which recently got charged and where the soul stone usage
 	--triggered the charge change event
 	if Recharge.noChargeChangeEvents[slotIndex] then
@@ -595,12 +599,13 @@ local function ARC_Durability_Changed(eventCode, bagId, slotIndex)
 	--Fix IsUnitDead("player") end where the durabilty changes but the player is not dead -> Repair starts -> Player is dead meanwhile
 	--in system -> server kicks us because of message spamming as we try to repair something while we are dead
 	zo_callLater(function()
-if Recharge.debug then d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>") end
-if Recharge.debug then d("[ARC_Durability_Changed]" .. GetItemLink(bagId, slotIndex)) end
+		local isDebugEnabled = Recharge.debug
+if isDebugEnabled then d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+	d("[ARC_Durability_Changed]" .. GetItemLink(bagId, slotIndex)) end
 		--Prevent durability change events for slotIndices which recently got repaired and where the repairKit usage
 		--triggered the durability change event
 		if Recharge.noDurabilityChangeEvents[slotIndex] then
-if Recharge.debug then d("<ABORTED - Durablity was changed by repairKit of this addon") end
+if isDebugEnabled then d("<ABORTED - Durablity was changed by repairKit of this addon") end
 			Recharge.noDurabilityChangeEvents[slotIndex] = nil
 			return
 		end
@@ -611,7 +616,7 @@ if Recharge.debug then d("<ABORTED - Durablity was changed by repairKit of this 
 
 		--Check if the item needs to be repaired now
 		ARC_RepairEquipped(settings.chatOutput, true, slotIndex)
-if Recharge.debug then d("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<") end
+if isDebugEnabled then d("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<") end
 	end, 100) --call slightly delayed
 end
 
@@ -623,13 +628,14 @@ local function TryParseOnOff(str)
 	if off then return false end
 	return nil
 end
+Recharge.TryParseOnOff = TryParseOnOff
 
 local function TryParsePercent(str)
 	local percent = tonumber(str)
 	if percent ~= nil and percent >= 0 and percent <= 100 then return (percent / 100) end
 	return nil
 end
-
+Recharge.TryParsePercent = TryParsePercent
 
 
 local function reAnchorControl(control, anchorMode, anchorToControl, anchorMode2, pX, pY)
@@ -693,7 +699,7 @@ local function ARC_buildAndAnchorTexture(parentControl, textureName, texturePath
 end
 
 local function ARC_InventorySingleSlotUpdate(eventCode, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
-	--if Recharge.debug then d("[ARC_InventorySingleSlotUpdate] bagId: " .. tostring(bagId) ..", slotId: " .. tostring(slotId) .. ", isNewItem: " .. tostring(isNewItem) .. ", inventoryUpdateReason: " .. tostring(inventoryUpdateReason) ..", storeWindowHidden: " .. tostring(ZO_StoreWindow:IsHidden()) .. ", showRepairKitsAtVendor: " .. tostring(Recharge.settings.showRepairKitsLeftAtVendor)) end
+	if Recharge.debug then d("[ARC_InventorySingleSlotUpdate] bagId: " .. tostring(bagId) ..", slotId: " .. tostring(slotId) .. ", isNewItem: " .. tostring(isNewItem) .. ", inventoryUpdateReason: " .. tostring(inventoryUpdateReason) ..", storeWindowHidden: " .. tostring(ZO_StoreWindow:IsHidden()) .. ", showRepairKitsAtVendor: " .. tostring(Recharge.settings.showRepairKitsLeftAtVendor)) end
 
 --[[
     INVENTORY_UPDATE_REASON_DEFAULT				= 0
@@ -778,13 +784,35 @@ local function ARC_Close_Store()
 end
 
 local function LoadSettings()
-	if Recharge.settings then return end
+	if Recharge.settings ~= nil then return end
 	Recharge.settings = {}
 	local worldName = GetWorldName()
+	local svName = Recharge.savedVarsName
+	local defaultSettings = Recharge.defaultSettings
+	local settingsSubTabName = "Settings"
 
 	--Recharge.settings = ZO_SavedVars:NewCharacterIdSettings(Recharge.savedVarsName, Recharge.savedVarsVersion, "Settings", Recharge.defaultSettings, nil)
-	Recharge.settings = ZO_SavedVars:NewAccountWide(Recharge.savedVarsName, 1, "Settings", Recharge.defaultSettings, worldName)
-	if not Recharge.settings.AccountWide then ZO_SavedVars:NewCharacterIdSettings(Recharge.savedVarsName, Recharge.savedVarsVersion, "Settings", Recharge.defaultSettings, worldName) end
+	Recharge.settings = ZO_SavedVars:NewAccountWide(svName, 1, settingsSubTabName, defaultSettings, worldName)
+	if not Recharge.settings.AccountWide then
+		--Unlink the account wide SV tables from the reference variable so assigning the character SVs will overwrite the account wide data
+		local svCopy = ZO_ShallowTableCopy(Recharge.settings)
+		Recharge.settings = svCopy
+		--Load character SV settings now and assign them to the settings reference variable, which points currently to a local copy of the account wide SVs
+		Recharge.settings = ZO_SavedVars:NewCharacterIdSettings(svName, Recharge.savedVarsVersion, settingsSubTabName, defaultSettings, worldName)
+		Recharge.settings.AccountWide = false --hard-set this at character settings
+	end
+
+	--Security handling of some variables
+	if Recharge.settings.minConditionPercent == nil then
+		Recharge.settings.minConditionPercent = defaultSettings.minConditionPercent
+	elseif Recharge.settings.minConditionPercent < 0 or Recharge.settings.minConditionPercent >= 1 then
+		Recharge.settings.minConditionPercent = defaultSettings.minConditionPercent
+	end
+	if Recharge.settings.minChargePercent == nil then
+		Recharge.settings.minChargePercent = defaultSettings.minChargePercent
+	elseif Recharge.settings.minChargePercent < 0 or Recharge.settings.minChargePercent >= 1 then
+		Recharge.settings.minChargePercent = defaultSettings.minChargePercent
+	end
 end
 
 
@@ -847,7 +875,7 @@ local function ARC_Initialize()
 end
 
 local function OnActiveWeaponPairChanged(eventId, activeWeaponPair, locked)
---if Recharge.debug then d("[AutoRecharge]ActiveWeaponPairChanged-activeWeaponPair: " ..tostring(activeWeaponPair) .. ", locked: " ..tostring(locked)) end
+	if Recharge.debug then d("[AutoRecharge]ActiveWeaponPairChanged-activeWeaponPair: " ..tostring(activeWeaponPair) .. ", locked: " ..tostring(locked)) end
 	if locked then
 		local settings = Recharge.settings
 		if settings.chargeOnWeaponChange == true and ARC_IsPlayerDead() == false then
