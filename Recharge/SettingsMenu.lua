@@ -8,6 +8,9 @@ local eventName = Recharge.eventName
 local serverName = GetWorldName()
 local accountName = GetDisplayName()
 
+local println = Recharge.Println
+local TryParsePercent = Recharge.TryParsePercent
+
 local function ARC_BuildAddonMenu()
 	--LibAddonMenu-2.0
 	local LAM = LibAddonMenu2
@@ -168,14 +171,20 @@ local function ARC_BuildAddonMenu()
 			tooltip = GetString(ARC_LAM_OPTION_AUTO_REPAIR_MIN_TH_TT),
 			min = 0,
 			max = 99,
+			step = 1,
 			getFunc = function() return (ARC_settings.minConditionPercent*100) end,
 			setFunc = function(percent)
-					local percentage = TryParsePercent(percent)
-					if percentage ~= nil and percentage >= 0 and percentage < 1 then
-						ARC_settings.minConditionPercent = percentage
-						if ARC_settings.chatOutput then println(GetString(ARC_CHATOUPUT_MIN_CONDITION),tostring(percent),"%") end
-                    end
- 				end,
+				local percentage = TryParsePercent(percent)
+				if percentage ~= nil and percentage >= 0 and percentage < 1 then
+					ARC_settings.minConditionPercent = percentage
+				else
+					--Error fallback value: Repair at 50%
+					percentage = 0.5
+					percent = 50
+					ARC_settings.minConditionPercent = percentage
+				end
+				if ARC_settings.chatOutput then println(GetString(ARC_CHATOUPUT_MIN_CONDITION),tostring(percent),"%") end
+			end,
             width="half",
 			default = (ARC_defSettings.minConditionPercent*100),
             disabled = function() return not ARC_settings.repairEnabled end,

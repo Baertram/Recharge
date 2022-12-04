@@ -26,8 +26,8 @@ local function ChargeItem(bagId,slotIndex,gems,minPercent)
 
 	local gem
 
-	local recharged = false
-	local total = 0
+	--local recharged = false
+	--local total = 0
 
 	local isAbove,charge,maxcharge = IsItemAboveThreshold(bagId,slotIndex,minPercent)
 
