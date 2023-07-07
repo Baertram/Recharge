@@ -50,6 +50,10 @@ local strings = {
 	ARC_LAM_OPTION_USE_REPAIR_KITS_FOR_ITEM_LEVEL_TT = "Sollten verschiedene Reparatursets im Inventar verfügbar sein, so wird das dem zu reparierenden Gegenstand Level entsprechende verwendet (z.B. 'Groß' für CP160 Rüstung), um den Gegenstand auf mindestens 90% zu reparieren",
 	ARC_LAM_OPTION_DO_NOT_USE_CROWN_STORE_REPAIR_KITS= "Kronen Shop Reparatur Kits nicht verwenden",
 	ARC_LAM_OPTION_DO_NOT_USE_CROWN_STORE_REPAIR_KITS_TT = "Ist diese Option aktiviert, dann werden Reparatursets aus dem Kronen Shop nicht für automatische Reparaturen verwendet.",
+	ARC_LAM_OPTION_USE_CROWN_STORE_REPAIR_KITS_FIRST = "Kronen Reperaturkits zuerst",
+	ARC_LAM_OPTION_USE_CROWN_STORE_REPAIR_KITS_FIRST_TT = "Verwende die Kronenshop Reperaturkits zuerst, und wenn keine mehr da sind verwende die normalen Kits",
+	ARC_LAM_OPTION_USE_CROWN_STORE_SOULGEMS_FIRST = "Kronen Seelensteine zuerst",
+	ARC_LAM_OPTION_USE_CROWN_STORE_SOULGEMS_FIRST_TT = "Verwende die Kronenshop Seelensteine zuerst, und wenn keine mehr da sind verwende die normalen Seelensteine",
 
 	--Chat output messages
 	ARC_CHATOUTPUT_CHARGED							= GetString(SI_ITEMTRAITTYPE2) .. ": ",

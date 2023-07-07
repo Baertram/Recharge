@@ -296,6 +296,8 @@ local function ARC_ChargeEquipped(chatOutput, inCombat, slotIndex)
         ARC_checkThresholdOrEmpty("soulGems", false, gemsCount)
 	end
 end
+Recharge.ARC_ChargeEquipped = ARC_ChargeEquipped
+
 
 local function resetRepair()
 	isRepairCurrentlyActive = false
@@ -528,6 +530,9 @@ if Recharge.debug then d(">>delayed call 4 - reset the repair prevention variabl
 		resetRepair()
 	end, totalDelay)
 end
+Recharge.ARC_RepairEquipped = ARC_RepairEquipped
+
+
 
 local function ARC_CombatStateChanged(eventCode, inCombat)
 if Recharge.debug then d("=========================================================")

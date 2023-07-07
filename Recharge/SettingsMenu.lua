@@ -51,6 +51,7 @@ local function ARC_BuildAddonMenu()
 			requiresReload = true,
 			default = ARC_defSettings.AccountWide,
 		},
+
 		--Automatic recharging
 		{
         	type = "header",
@@ -127,6 +128,17 @@ local function ARC_BuildAddonMenu()
 			disabled = function() return not ARC_settings.chargeOnWeaponChange end,
 			width="half",
 		},
+		{
+			type = "checkbox",
+			name = GetString(ARC_LAM_OPTION_USE_CROWN_STORE_SOULGEMS_FIRST),
+			tooltip = GetString(ARC_LAM_OPTION_USE_CROWN_STORE_SOULGEMS_FIRST_TT),
+			getFunc = function() return ARC_settings.useCrownSoulgemsFirst end,
+			setFunc = function(value) ARC_settings.useCrownSoulgemsFirst = value end,
+			default = ARC_defSettings.useCrownSoulgemsFirst,
+			--disabled = function() return ARC_settings.dontUseCrownSoulgems end,
+			width="full",
+		},
+
 		--Automatic repairing
 		{
         	type = "header",
@@ -216,6 +228,17 @@ local function ARC_BuildAddonMenu()
 			default = ARC_defSettings.dontUseCrownRepairKits,
 			width="full",
 		},
+		{
+			type = "checkbox",
+			name = GetString(ARC_LAM_OPTION_USE_CROWN_STORE_REPAIR_KITS_FIRST),
+			tooltip = GetString(ARC_LAM_OPTION_USE_CROWN_STORE_REPAIR_KITS_FIRST_TT),
+			getFunc = function() return ARC_settings.useCrownRepairKitsFirst end,
+			setFunc = function(value) ARC_settings.useCrownRepairKitsFirst = value end,
+			default = ARC_defSettings.useCrownRepairKitsFirst,
+			disabled = function() return ARC_settings.dontUseCrownRepairKits end,
+			width="full",
+		},
+
 
 		--Chat output
 		{
