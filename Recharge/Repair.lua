@@ -8,19 +8,26 @@ local function IsItemAboveConditionThreshold(bagId,slotIndex,minPercent)
     if bagId == nil or slotIndex == nil then return end
     local isDebugEnabled = Recharge.debug
     local itemLink = GetItemLink(bagId, slotIndex)
-if isDebugEnabled then d("[IsItemAboveConditionThreshold]" ..itemLink) end
+    local condition = GetItemCondition(bagId,slotIndex)
+    local isAbove = (condition / 100) > minPercent
+if isDebugEnabled then d("[IsItemAboveConditionThreshold]" ..itemLink ..", isAbove: " ..tostring(isAbove) ..", threshold: " .. tostring(minPercent) .. ", condition: " ..tostring(condition)) end
+
     --Is an item equipped at this slot? OffHand weapons (2hd) also count as
-    --equipped (slotHAsItem return true! So we need to check the itemLink as well)
+    --equipped (slotHasItem return true! So we need to check the itemLink as well)
     if bagId == BAG_WORN then
         local _, slotHasItem = GetEquippedItemInfo(bagId, slotIndex)
-        if not slotHasItem then return true, 100 end
+        if isDebugEnabled then d(">slotHasItem: " ..tostring(slotHasItem)) end
+        if not slotHasItem then
+            --todo: 20230708 - Baertram: Currently a ZOs bug in GetEquippedItemInfo(0, 8) "legs" e.g. is returning only false and empty data here
+            --if NOT all armor parts are equipped. So we will deactivate that extar check here.
+            -- return true, 100
+        end
     end
     if itemLink == nil or itemLink == "" then
 if isDebugEnabled then d("<<ABORT! No itemlink") end
         return true, 100
     end
-    local condition = GetItemCondition(bagId,slotIndex)
-    return (condition / 100) > minPercent,condition
+    return isAbove, condition
 end
 
 --[[
@@ -58,7 +65,6 @@ if isDebugEnabled then d("[Recharge]RepairItem - slotIndex: " ..tostring(slotInd
 	if count < 1 then return 0, false, false, false, 0  end
 	--Is the item's condition below the set threshold?
 	local isAbove,condition = IsItemAboveConditionThreshold(bagId,slotIndex,minPercent)
-if isDebugEnabled then d(">isAbove:" ..isAbove ..", threshold: " .. tostring(minPercent) .. ", condition: " ..tostring(condition)) end
 	if isAbove == true then return 0, false, false, false, condition end
 
     --item can be repaired, so find a kit now!
@@ -100,7 +106,7 @@ if isDebugEnabled then d(">use repair kit for item level: " ..tostring(level)) e
             end
         end
     else
-if isDebugEnabled then d(">using any repair kit") end
+if isDebugEnabled then d(">using any repair kit - crown first: " ..tostring(useCrownRepairKitsFirst)) end
         foundKit = true -- Just tell the addon to go on by setting this variable to true
 	end -- Use item level appropriate repair kit
 

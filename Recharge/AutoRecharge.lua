@@ -31,7 +31,7 @@ local isRepairCurrentlyActive = Recharge._isRepairCurrentlyActive
 Recharge.noChargeChangeEvents = {}
 Recharge.noDurabilityChangeEvents = {}
 
-local _repairSlots		= {EQUIP_SLOT_OFF_HAND,EQUIP_SLOT_BACKUP_OFF, EQUIP_SLOT_HEAD, EQUIP_SLOT_SHOULDERS, EQUIP_SLOT_CHEST,EQUIP_SLOT_WAIST, EQUIP_SLOT_LEGS,EQUIP_SLOT_HAND, EQUIP_SLOT_FEET}
+local _repairSlots		= {EQUIP_SLOT_OFF_HAND,EQUIP_SLOT_BACKUP_OFF, EQUIP_SLOT_HEAD, EQUIP_SLOT_SHOULDERS, EQUIP_SLOT_CHEST,EQUIP_SLOT_WAIST, EQUIP_SLOT_LEGS, EQUIP_SLOT_HAND, EQUIP_SLOT_FEET}
 local _rechargeSlots	= {EQUIP_SLOT_MAIN_HAND,EQUIP_SLOT_OFF_HAND,EQUIP_SLOT_BACKUP_MAIN,EQUIP_SLOT_BACKUP_OFF}
 
 local _slotText = {
@@ -381,7 +381,7 @@ if isDebugEnabled then d("<<ABORT - Kits count is 0") end
 					if checkNextSlotDelay == 0 then
 
 						if isDebugEnabled then d(">> ???????????????????????????????????????")
-							d(">>Repair check, no delay, slot: " ..tostring(slot) .. "-" .. GetItemLink(BAG_WORN, slot)) end
+							d(">>Repair check, no delay, slot: " ..tostring(slot) .. "(".._slotText[slot]..")-" .. GetItemLink(BAG_WORN, slot)) end
 						if not wasCrownRepairKitUsed and not abortedDueToDeath then
 							--Prevent the repair try if a crown store repair kit was used already
 							total, wasCrownRepairKitUsed, kitWasUsed, abortedDueToDeath, newCondition = REPAIR.RepairItem(BAG_WORN, slot, kits, minConditionPercent)
@@ -413,12 +413,13 @@ if isDebugEnabled then d("<<ABORT - Kits count is 0") end
 
 					else
 						if isDebugEnabled then d("~~~> Registering repair check with delay: " ..tostring(checkNextSlotDelay)) end
+						local currentLoopDelay = checkNextSlotDelay
 
 						--All other further slots to check
 						--Delay each slot check by the milliseconds repair delay chosen in the settings menu
 						zo_callLater(function()
 							if isDebugEnabled then d(">> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-								d(">>Repair check, delayed by "..tostring(checkNextSlotDelay)..", next slot: " ..tostring(slot) .. " - " .. GetItemLink(BAG_WORN, slot)) end
+								d(">>Repair check, delayed by "..tostring(currentLoopDelay)..", next slot: " ..tostring(slot) .. "(".._slotText[slot]..")-" .. GetItemLink(BAG_WORN, slot)) end
 							--Prevent the repair try if a crown store repair kit was used already
 							if not wasCrownRepairKitUsed and not abortedDueToDeath then
 								total, wasCrownRepairKitUsed, kitWasUsed, abortedDueToDeath, newCondition = REPAIR.RepairItem(BAG_WORN, slot, kits, minConditionPercent)
@@ -459,7 +460,7 @@ if isDebugEnabled then d("<<ABORT - Kits count is 0") end
 
 				else
 					if isDebugEnabled then d(">> 00000000000000000000000000000")
-						d(">>Non equipped item, slot: " ..tostring(slot))
+						d(">>Non equipped item, slot: " ..tostring(slot) .. "(".._slotText[slot]..")")
   					end
 				end
 
