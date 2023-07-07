@@ -151,6 +151,8 @@ end
 
 local function ARC_showAlertMessage(alertType, value)
 	if not alertType then return false end
+	if Recharge.debug then d("[ARC_showAlertMessage]alertType: " ..tostring(alertType) .. ", value: " ..tostring(value)) end
+
     local alertMsg
     local iconText
     if alertType == "repairKitsEmpty" then
@@ -169,7 +171,12 @@ local function ARC_showAlertMessage(alertType, value)
         iconText = zo_iconTextFormat("esoui/art/icons/soulgem_006_empty.dds", 48, 48, " ")
     end
     if alertMsg and alertMsg ~= "" then
-		CENTER_SCREEN_ANNOUNCE:AddMessage(EVENT_SKILL_RANK_UPDATE, CSA_EVENT_SMALL_TEXT, nil, iconText .. Recharge.preChatTextRed .. alertMsg)
+		if Recharge.debug then d(">alertMsg: " ..tostring(alertMsg)) end
+		--CENTER_SCREEN_ANNOUNCE:AddMessage(EVENT_SKILL_RANK_UPDATE, CSA_EVENT_SMALL_TEXT, nil, iconText .. Recharge.preChatTextRed .. alertMsg)
+		local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.ANTIQUITIES_FANFARE_FAILURE)
+		messageParams:SetText(iconText .. Recharge.preChatTextRed .. alertMsg)
+		messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_OBJECTIVE_COMPLETED)
+		CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
     end
 end
 
@@ -178,13 +185,15 @@ local function ARC_checkThresholdOrEmpty(checkType, emptyOrThreshold, amount)
     if emptyOrThreshold == nil then return false end
     if amount == nil then return false end
 	local settings = Recharge.settings
+	if Recharge.debug then d("[ARC_checkThresholdOrEmpty]checkType: " ..tostring(checkType) .. ", emptyOrThreshold: " ..tostring(emptyOrThreshold) ..  ", amount: " ..tostring(amount)) end
 
     if 		checkType == "repairKits" then
-    	if emptyOrThreshold then
+    	if emptyOrThreshold == true then
             if amount == 0 then
 	        	ARC_showAlertMessage("repairKitsEmpty")
             end
         else
+			if Recharge.debug then d(">threshold repair kits: " ..tostring(settings.alertRepairKitsSoonEmptyThreshold)) end
 			if amount < settings.alertRepairKitsSoonEmptyThreshold then
                 ARC_showAlertMessage("repairKitsSoonEmpty", amount)
             end
@@ -195,6 +204,7 @@ local function ARC_checkThresholdOrEmpty(checkType, emptyOrThreshold, amount)
                 ARC_showAlertMessage("soulGemsEmpty")
             end
         else
+			if Recharge.debug then d(">threshold soulgems: " ..tostring(settings.alertSoulGemsSoonEmptyThreshold)) end
 			if amount < settings.alertSoulGemsSoonEmptyThreshold then
                 ARC_showAlertMessage("soulGemsSoonEmpty", amount)
             end
@@ -722,8 +732,10 @@ end
 
 local function ARC_Open_Store()
 	local settings = Recharge.settings
-    if settings.alertRepairKitsEmptyOnVendorOpen then
+	if Recharge.debug then d("[ARC_Open_Store]Alert on open: " ..tostring(settings.alertRepairKitsEmptyOnVendorOpen)) end
+    if settings.alertRepairKitsEmptyOnVendorOpen == true then
 		local kitsCount = ARC_GetRepairKitsCount()
+		if Recharge.debug then d(">kitsCount: " ..tostring(kitsCount)) end
 		ARC_checkThresholdOrEmpty("repairKits", kitsCount == 0, kitsCount)
     end
 
