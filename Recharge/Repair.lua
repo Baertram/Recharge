@@ -15,12 +15,10 @@ if isDebugEnabled then d("[IsItemAboveConditionThreshold]" ..itemLink ..", isAbo
     --Is an item equipped at this slot? OffHand weapons (2hd) also count as
     --equipped (slotHasItem return true! So we need to check the itemLink as well)
     if bagId == BAG_WORN then
-        local _, slotHasItem = GetEquippedItemInfo(bagId, slotIndex)
+        local _, slotHasItem = GetEquippedItemInfo(slotIndex)
         if isDebugEnabled then d(">slotHasItem: " ..tostring(slotHasItem)) end
         if not slotHasItem then
-            --todo: 20230708 - Baertram: Currently a ZOs bug in GetEquippedItemInfo(0, 8) "legs" e.g. is returning only false and empty data here
-            --if NOT all armor parts are equipped. So we will deactivate that extar check here.
-            -- return true, 100
+            return true, 100
         end
     end
     if itemLink == nil or itemLink == "" then
