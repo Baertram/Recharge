@@ -1,6 +1,6 @@
 local addonName = "Auto%sRecharge"
 Recharge = {
-	version				= "2.75",
+	version				= "2.76",
     author				= "XanDDemoX, current: Baertram",
     name				= string.format(addonName, " "),
     displayName			= string.format(addonName, " "),
@@ -35,19 +35,6 @@ local _repairSlots		= {EQUIP_SLOT_OFF_HAND,EQUIP_SLOT_BACKUP_OFF, EQUIP_SLOT_HEA
 local _rechargeSlots	= {EQUIP_SLOT_MAIN_HAND,EQUIP_SLOT_OFF_HAND,EQUIP_SLOT_BACKUP_MAIN,EQUIP_SLOT_BACKUP_OFF}
 
 local _slotText = {
---[[
-	[EQUIP_SLOT_MAIN_HAND] 		= GetString(SI_EQUIPTYPE14),
-	[EQUIP_SLOT_OFF_HAND] 		= GetString(SI_EQUIPTYPE7),
-	[EQUIP_SLOT_BACKUP_MAIN] 	= GetString(SI_EQUIPSLOT20),
-	[EQUIP_SLOT_BACKUP_OFF] 	= GetString(SI_EQUIPSLOT21),
-	[EQUIP_SLOT_HEAD] 			= GetString(SI_EQUIPTYPE1),
-	[EQUIP_SLOT_SHOULDERS] 		= GetString(SI_EQUIPTYPE4),
-	[EQUIP_SLOT_CHEST] 			= GetString(SI_EQUIPTYPE3),
-	[EQUIP_SLOT_WAIST] 			= GetString(SI_EQUIPTYPE8),
-	[EQUIP_SLOT_LEGS] 			= GetString(SI_EQUIPTYPE9),
-	[EQUIP_SLOT_HAND] 			= GetString(SI_EQUIPTYPE13),
-	[EQUIP_SLOT_FEET] 			= GetString(SI_EQUIPTYPE10)
-]]
 	[EQUIP_SLOT_MAIN_HAND] 		= GetString(SI_EQUIPTYPE14),
 	[EQUIP_SLOT_OFF_HAND] 		= GetString(SI_EQUIPTYPE7),
 	[EQUIP_SLOT_BACKUP_MAIN] 	= GetString(SI_EQUIPSLOT20),
@@ -88,6 +75,8 @@ Recharge.defaultSettings = {
     useRepairKitForItemLevel            = false,
 
 	dontUseCrownRepairKits				= false,
+	useCrownRepairKitsFirst				= false,
+	useCrownSoulgemsFirst				= false,
 
     chatOutput							= true,
     chatOutputSuppressNothingMessages	= true,
@@ -379,21 +368,21 @@ if isDebugEnabled then d("<<ABORT - Kits count is 0") end
 					--First slot to check?
 					if checkNextSlotDelay == 0 then
 
-if isDebugEnabled then d(">> ???????????????????????????????????????")
-	d(">>Repair check slot no delay: " ..tostring(slot) .. " - " .. GetItemLink(BAG_WORN, slot)) end
+						if isDebugEnabled then d(">> ???????????????????????????????????????")
+							d(">>Repair check, no delay, slot: " ..tostring(slot) .. "-" .. GetItemLink(BAG_WORN, slot)) end
 						if not wasCrownRepairKitUsed and not abortedDueToDeath then
 							--Prevent the repair try if a crown store repair kit was used already
 							total, wasCrownRepairKitUsed, kitWasUsed, abortedDueToDeath, newCondition = REPAIR.RepairItem(BAG_WORN, slot, kits, minConditionPercent)
 							--A repair kit was used?
 							if not abortedDueToDeath and kitWasUsed then
 								--Update the crown repair kit used flag
-								if wasCrownRepairKitUsed then
-if isDebugEnabled then d("<<break loop -> Crown repair kit used") end
+								if wasCrownRepairKitUsed == true then
+									if isDebugEnabled then d("<<break loop -> Crown repair kit used") end
 									totalDelay = 0
 									break --leave the loop
 								end
 							elseif abortedDueToDeath then
-if isDebugEnabled then d("<<break loop -> Dead") end
+								if isDebugEnabled then d("<<break loop -> Dead") end
 								totalDelay = 0
 								break --leave the loop
 							end
@@ -404,19 +393,20 @@ if isDebugEnabled then d("<<break loop -> Dead") end
 								chatOutputStr = (chatOutputStr or GetString(ARC_CHATOUTPUT_REPAIRED))..((chatOutputStr and ", ") or "")..ARC_GetEquipSlotText(slot).." (+"..tostring(round(total,2)).." = " .. tostring(round(newCondition,2)) .. " %)"
 							end
 						else
-if isDebugEnabled then d("<<break loop -> Dead or crown repair kit used") end
+							if isDebugEnabled then d("<<break loop -> Dead or crown repair kit used") end
 							totalDelay = 0
 							break --leave the loop
 						end
-if isDebugEnabled then d("<< ???????????????????????????????????????") end
+						if isDebugEnabled then d("<< ???????????????????????????????????????") end
 
 					else
+						if isDebugEnabled then d("~~~> Registering repair check with delay: " ..tostring(checkNextSlotDelay)) end
 
 						--All other further slots to check
 						--Delay each slot check by the milliseconds repair delay chosen in the settings menu
 						zo_callLater(function()
-if isDebugEnabled then d(">> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-		d(">>Repair check further slot: " ..tostring(slot) .. " - " .. GetItemLink(BAG_WORN, slot)) end
+							if isDebugEnabled then d(">> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+								d(">>Repair check, delayed by "..tostring(checkNextSlotDelay)..", next slot: " ..tostring(slot) .. " - " .. GetItemLink(BAG_WORN, slot)) end
 							--Prevent the repair try if a crown store repair kit was used already
 							if not wasCrownRepairKitUsed and not abortedDueToDeath then
 								total, wasCrownRepairKitUsed, kitWasUsed, abortedDueToDeath, newCondition = REPAIR.RepairItem(BAG_WORN, slot, kits, minConditionPercent)
@@ -424,17 +414,17 @@ if isDebugEnabled then d(">> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 								if not abortedDueToDeath and kitWasUsed then
 									--Update the crown repair kit used flag
 									if wasCrownRepairKitUsed then
-if isDebugEnabled then d("<<return delayed call -> Crown repair kit used") end
+										if isDebugEnabled then d("<<return delayed call -> Crown repair kit used") end
 										totalDelay = 0
 										return --end zo_callLater function
 									end
 								elseif abortedDueToDeath then
-if isDebugEnabled then d("<<return delayed call -> Dead") end
+									if isDebugEnabled then d("<<return delayed call -> Dead") end
 									totalDelay = 0
 									return --end zo_callLater function
 								end
 							else
-if isDebugEnabled then d("<<return delayed call -> Dead or crown repair kit used") end
+								if isDebugEnabled then d("<<return delayed call -> Dead or crown repair kit used") end
 								totalDelay = 0
 								return --end zo_callLater function
 							end
@@ -444,7 +434,7 @@ if isDebugEnabled then d("<<return delayed call -> Dead or crown repair kit used
 							if not abortedDueToDeath and chatOutput and not wasCrownRepairKitUsed and total > 0 and kitWasUsed then
 								chatOutputStr = (chatOutputStr or GetString(ARC_CHATOUTPUT_REPAIRED))..((chatOutputStr and ", ") or "")..ARC_GetEquipSlotText(slot).." (+"..tostring(round(total,2)).." = " .. tostring(round(newCondition,2)) .. " %)"
 							end
-if isDebugEnabled then d("<< !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!") end
+							if isDebugEnabled then d("<< !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!") end
 						end, checkNextSlotDelay)
 
 					end
@@ -455,6 +445,10 @@ if isDebugEnabled then d("<< !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!") end
 					--Update the total delay for the further checks and the chat output
 					totalDelay = checkNextSlotDelay
 
+				else
+					if isDebugEnabled then d(">> 00000000000000000000000000000")
+						d(">>Non equipped item, slot: " ..tostring(slot))
+  					end
 				end
 
 				--Slot to check was checked, abort other slot checks
@@ -480,7 +474,7 @@ if isDebugEnabled then d(">total delay: " ..tostring(totalDelay)) end
 		totalDelay = totalDelay + 25 --add a small delay before the chat output
 		--Do the other chat output now
 		zo_callLater(function()
-			local isDebugEnabled = Recharge.debug
+			isDebugEnabled = Recharge.debug
 if isDebugEnabled then d(">>0000000000 Delayed chatOutput 0000000000000") end
 			--Was a crown store repair kit used?
 			-->Show the chat output for it as it was not done already above!
