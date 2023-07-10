@@ -8,19 +8,24 @@ local function IsItemAboveConditionThreshold(bagId,slotIndex,minPercent)
     if bagId == nil or slotIndex == nil then return end
     local isDebugEnabled = Recharge.debug
     local itemLink = GetItemLink(bagId, slotIndex)
-if isDebugEnabled then d("[IsItemAboveConditionThreshold]" ..itemLink) end
+    local condition = GetItemCondition(bagId,slotIndex)
+    local isAbove = (condition / 100) > minPercent
+if isDebugEnabled then d("[IsItemAboveConditionThreshold]" ..itemLink ..", isAbove: " ..tostring(isAbove) ..", threshold: " .. tostring(minPercent) .. ", condition: " ..tostring(condition)) end
+
     --Is an item equipped at this slot? OffHand weapons (2hd) also count as
-    --equipped (slotHAsItem return true! So we need to check the itemLink as well)
+    --equipped (slotHasItem return true! So we need to check the itemLink as well)
     if bagId == BAG_WORN then
-        local _, slotHasItem = GetEquippedItemInfo(bagId, slotIndex)
-        if not slotHasItem then return true, 100 end
+        local _, slotHasItem = GetEquippedItemInfo(slotIndex)
+        if isDebugEnabled then d(">slotHasItem: " ..tostring(slotHasItem)) end
+        if not slotHasItem then
+            return true, 100
+        end
     end
     if itemLink == nil or itemLink == "" then
 if isDebugEnabled then d("<<ABORT! No itemlink") end
         return true, 100
     end
-    local condition = GetItemCondition(bagId,slotIndex)
-    return (condition / 100) > minPercent,condition
+    return isAbove, condition
 end
 
 --[[
@@ -59,6 +64,7 @@ if isDebugEnabled then d("[Recharge]RepairItem - slotIndex: " ..tostring(slotInd
 	--Is the item's condition below the set threshold?
 	local isAbove,condition = IsItemAboveConditionThreshold(bagId,slotIndex,minPercent)
 	if isAbove == true then return 0, false, false, false, condition end
+
     --item can be repaired, so find a kit now!
     local amount = 0
     local kitsIndex = #kits or 0
@@ -66,14 +72,16 @@ if isDebugEnabled then d("[Recharge]RepairItem - slotIndex: " ..tostring(slotInd
 
     local settings = Recharge.settings
     local useRepairKitForItemLevel = settings.useRepairKitForItemLevel
+	local useCrownRepairKitsFirst = settings.useCrownRepairKitsFirst
 
 	-- Use item level appropriate repair kit?
-	if useRepairKitForItemLevel then
+	if useRepairKitForItemLevel == true then
         --Get the item's link
         local link = GetItemLink(bagId,slotIndex,LINK_STYLE_DEFAULT)
         if link ~= nil then
             --Get the item's level
             local level = GetItemLinkRequiredLevel(link)
+if isDebugEnabled then d(">use repair kit for item level: " ..tostring(level)) end
             --Find a kit which can do up to 90% repair -> Code by ESOUI.com user "simonhang"!
             while(kitsIndex > 0 and foundKit == false) do
                 local kit = kits[kitsIndex]
@@ -96,28 +104,30 @@ if isDebugEnabled then d("[Recharge]RepairItem - slotIndex: " ..tostring(slotInd
             end
         end
     else
+if isDebugEnabled then d(">using any repair kit - crown first: " ..tostring(useCrownRepairKitsFirst)) end
         foundKit = true -- Just tell the addon to go on by setting this variable to true
 	end -- Use item level appropriate repair kit
 
     --Was a kit found that should be used?
-	if foundKit == true and kitsIndex > 0 then
+    if foundKit == true and kitsIndex > 0 then
         local repairKitWasUsed = false
         --Get the repair kit by it's index (either the last one in the table,
         -- or the determined one for the current item's level, that needs to be repaired)
-		local kit = kits[kitsIndex]
+        local kit = kits[kitsIndex]
         if kit ~= nil then
 
-if isDebugEnabled then d(">starting repair attempt (min%: " ..tostring(minPercent) .. "/cond: " ..tostring(condition) .."): " .. GetItemLink(bagId,slotIndex))
-    d(">foundKit! " ..GetItemLink(kit.bag,kit.index)) end
+            --Use CrownStore repair kits first?
+            local isCrownStoreRepairKit = (IsItemNonCrownRepairKit(kit.bag,kit.index) == false) or false
+            if isDebugEnabled then d(">starting repair attempt (min%: " ..tostring(minPercent) .. "/cond: " ..tostring(condition).."): " .. GetItemLink(bagId,slotIndex))
+                d(">foundKit, isCrownRepair: " .. tostring(isCrownStoreRepairKit) .." - " ..GetItemLink(kit.bag,kit.index)) end
 
             local oldcondition = condition
-            local isCrownStoreRepairKit = (IsItemNonCrownRepairKit(kit.bag,kit.index) == false) or false
             if isCrownStoreRepairKit == true then
-if isDebugEnabled then d(">>crown repair kit") end
+                if isDebugEnabled then d(">>crown repair kit") end
                 --Crown store repair kit will repair all equipped items to 100%
                 amount = 100
                 --Repair the item with the crown repair kit now, by using it
-	            if isPlayerDead() then return 0, false, false, true, condition end
+                if isPlayerDead() then return 0, false, false, true, condition end
 
                 if tryToUseItem(kit.bag,kit.index) == true then
                     -->Attention: This will fire EVENT_INVENTORY_SINGLE_SLOT_UPDATE with INVENTORY_UPDATE_REASON_DURABILITY_CHANGE and
@@ -132,7 +142,7 @@ if isDebugEnabled then d(">>crown repair kit") end
                 if not useRepairKitForItemLevel then
                     amount = GetAmountRepairKitWouldRepairItem(bagId,slotIndex,kit.bag,kit.index)
                 end
-if isDebugEnabled then d(">>normal repair kit") end
+                if isDebugEnabled then d(">>normal repair kit") end
 
                 if isPlayerDead() then return 0, false, false, true, condition end
                 --Repair the item with the repair kit now
@@ -142,6 +152,7 @@ if isDebugEnabled then d(">>normal repair kit") end
                 RepairItemWithRepairKit(bagId,slotIndex,kit.bag,kit.index)
                 repairKitWasUsed = true
             end
+
             if repairKitWasUsed == true then
                 --Reduce the repair kits stacksize by 1
                 kit.size = kit.size - 1
@@ -155,14 +166,16 @@ if isDebugEnabled then d(">>normal repair kit") end
                 if condition > 100 then
                     condition = 100
                 end
-if isDebugEnabled then d(">>repair kit used, amount: " ..tostring(amount) .. ", condition: " ..tostring(condition)) end
+                if isDebugEnabled then d(">>repair kit used, amount: " ..tostring(amount) .. ", condition: " ..tostring(condition)) end
                 --Return the difference the repair kit repaired!
                 local repairedAmount = condition-oldcondition
                 return repairedAmount, isCrownStoreRepairKit, repairKitWasUsed, false, condition
             end
             return 0, isCrownStoreRepairKit, repairKitWasUsed, false, condition
         end
-	end
+    else
+if isDebugEnabled then d("<Abort: No appropriate repair kit found!") end
+    end
 
 	return 0, false, false, false, condition
 end

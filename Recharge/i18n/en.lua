@@ -47,6 +47,11 @@ local strings = {
 	ARC_LAM_OPTION_USE_REPAIR_KITS_FOR_ITEM_LEVEL_TT = "If you own several repair kits the appropriate one will be used for the item's level (e.g. 'grand kit' for CP 160 items), repairing your item to at least 90% condition",
 	ARC_LAM_OPTION_DO_NOT_USE_CROWN_STORE_REPAIR_KITS= "Don't use crown shop repair kits",
 	ARC_LAM_OPTION_DO_NOT_USE_CROWN_STORE_REPAIR_KITS_TT = "With this setting enabled no crown shop repair kits will be used for automatic repairs.",
+	ARC_LAM_OPTION_USE_CROWN_STORE_REPAIR_KITS_FIRST = "Crown repair kits first",
+	ARC_LAM_OPTION_USE_CROWN_STORE_REPAIR_KITS_FIRST_TT = "Use the Crown Store repair kits first, and if noone is left use the normal repair kits",
+	ARC_LAM_OPTION_USE_CROWN_STORE_SOULGEMS_FIRST = "Crown soulgems first",
+	ARC_LAM_OPTION_USE_CROWN_STORE_SOULGEMS_FIRST_TT = "Use the Crown Store soulgemns first, and if noone is left use the normal soulgems",
+
 
 	ARC_LAM_OPTION_AUTO_RECHARGE_IN_COMBAT			= "Recharge in combat",
 	ARC_LAM_OPTION_AUTO_RECHARGE_IN_COMBAT_TT		= "Automatically recharge your weapons also during the combat",

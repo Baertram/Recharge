@@ -1,6 +1,6 @@
 local addonName = "Auto%sRecharge"
 Recharge = {
-	version				= "2.75",
+	version				= "2.76",
     author				= "XanDDemoX, current: Baertram",
     name				= string.format(addonName, " "),
     displayName			= string.format(addonName, " "),
@@ -31,23 +31,10 @@ local isRepairCurrentlyActive = Recharge._isRepairCurrentlyActive
 Recharge.noChargeChangeEvents = {}
 Recharge.noDurabilityChangeEvents = {}
 
-local _repairSlots		= {EQUIP_SLOT_OFF_HAND,EQUIP_SLOT_BACKUP_OFF, EQUIP_SLOT_HEAD, EQUIP_SLOT_SHOULDERS, EQUIP_SLOT_CHEST,EQUIP_SLOT_WAIST, EQUIP_SLOT_LEGS,EQUIP_SLOT_HAND, EQUIP_SLOT_FEET}
+local _repairSlots		= {EQUIP_SLOT_OFF_HAND,EQUIP_SLOT_BACKUP_OFF, EQUIP_SLOT_HEAD, EQUIP_SLOT_SHOULDERS, EQUIP_SLOT_CHEST,EQUIP_SLOT_WAIST, EQUIP_SLOT_LEGS, EQUIP_SLOT_HAND, EQUIP_SLOT_FEET}
 local _rechargeSlots	= {EQUIP_SLOT_MAIN_HAND,EQUIP_SLOT_OFF_HAND,EQUIP_SLOT_BACKUP_MAIN,EQUIP_SLOT_BACKUP_OFF}
 
 local _slotText = {
---[[
-	[EQUIP_SLOT_MAIN_HAND] 		= GetString(SI_EQUIPTYPE14),
-	[EQUIP_SLOT_OFF_HAND] 		= GetString(SI_EQUIPTYPE7),
-	[EQUIP_SLOT_BACKUP_MAIN] 	= GetString(SI_EQUIPSLOT20),
-	[EQUIP_SLOT_BACKUP_OFF] 	= GetString(SI_EQUIPSLOT21),
-	[EQUIP_SLOT_HEAD] 			= GetString(SI_EQUIPTYPE1),
-	[EQUIP_SLOT_SHOULDERS] 		= GetString(SI_EQUIPTYPE4),
-	[EQUIP_SLOT_CHEST] 			= GetString(SI_EQUIPTYPE3),
-	[EQUIP_SLOT_WAIST] 			= GetString(SI_EQUIPTYPE8),
-	[EQUIP_SLOT_LEGS] 			= GetString(SI_EQUIPTYPE9),
-	[EQUIP_SLOT_HAND] 			= GetString(SI_EQUIPTYPE13),
-	[EQUIP_SLOT_FEET] 			= GetString(SI_EQUIPTYPE10)
-]]
 	[EQUIP_SLOT_MAIN_HAND] 		= GetString(SI_EQUIPTYPE14),
 	[EQUIP_SLOT_OFF_HAND] 		= GetString(SI_EQUIPTYPE7),
 	[EQUIP_SLOT_BACKUP_MAIN] 	= GetString(SI_EQUIPSLOT20),
@@ -88,6 +75,8 @@ Recharge.defaultSettings = {
     useRepairKitForItemLevel            = false,
 
 	dontUseCrownRepairKits				= false,
+	useCrownRepairKitsFirst				= false,
+	useCrownSoulgemsFirst				= false,
 
     chatOutput							= true,
     chatOutputSuppressNothingMessages	= true,
@@ -162,6 +151,8 @@ end
 
 local function ARC_showAlertMessage(alertType, value)
 	if not alertType then return false end
+	if Recharge.debug then d("[ARC_showAlertMessage]alertType: " ..tostring(alertType) .. ", value: " ..tostring(value)) end
+
     local alertMsg
     local iconText
     if alertType == "repairKitsEmpty" then
@@ -180,7 +171,12 @@ local function ARC_showAlertMessage(alertType, value)
         iconText = zo_iconTextFormat("esoui/art/icons/soulgem_006_empty.dds", 48, 48, " ")
     end
     if alertMsg and alertMsg ~= "" then
-		CENTER_SCREEN_ANNOUNCE:AddMessage(EVENT_SKILL_RANK_UPDATE, CSA_EVENT_SMALL_TEXT, nil, iconText .. Recharge.preChatTextRed .. alertMsg)
+		if Recharge.debug then d(">alertMsg: " ..tostring(alertMsg)) end
+		--CENTER_SCREEN_ANNOUNCE:AddMessage(EVENT_SKILL_RANK_UPDATE, CSA_EVENT_SMALL_TEXT, nil, iconText .. Recharge.preChatTextRed .. alertMsg)
+		local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.ANTIQUITIES_FANFARE_FAILURE)
+		messageParams:SetText(iconText .. Recharge.preChatTextRed .. alertMsg)
+		messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_OBJECTIVE_COMPLETED)
+		CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
     end
 end
 
@@ -189,13 +185,15 @@ local function ARC_checkThresholdOrEmpty(checkType, emptyOrThreshold, amount)
     if emptyOrThreshold == nil then return false end
     if amount == nil then return false end
 	local settings = Recharge.settings
+	if Recharge.debug then d("[ARC_checkThresholdOrEmpty]checkType: " ..tostring(checkType) .. ", emptyOrThreshold: " ..tostring(emptyOrThreshold) ..  ", amount: " ..tostring(amount)) end
 
     if 		checkType == "repairKits" then
-    	if emptyOrThreshold then
+    	if emptyOrThreshold == true then
             if amount == 0 then
 	        	ARC_showAlertMessage("repairKitsEmpty")
             end
         else
+			if Recharge.debug then d(">threshold repair kits: " ..tostring(settings.alertRepairKitsSoonEmptyThreshold)) end
 			if amount < settings.alertRepairKitsSoonEmptyThreshold then
                 ARC_showAlertMessage("repairKitsSoonEmpty", amount)
             end
@@ -206,6 +204,7 @@ local function ARC_checkThresholdOrEmpty(checkType, emptyOrThreshold, amount)
                 ARC_showAlertMessage("soulGemsEmpty")
             end
         else
+			if Recharge.debug then d(">threshold soulgems: " ..tostring(settings.alertSoulGemsSoonEmptyThreshold)) end
 			if amount < settings.alertSoulGemsSoonEmptyThreshold then
                 ARC_showAlertMessage("soulGemsSoonEmpty", amount)
             end
@@ -307,6 +306,8 @@ local function ARC_ChargeEquipped(chatOutput, inCombat, slotIndex)
         ARC_checkThresholdOrEmpty("soulGems", false, gemsCount)
 	end
 end
+Recharge.ARC_ChargeEquipped = ARC_ChargeEquipped
+
 
 local function resetRepair()
 	isRepairCurrentlyActive = false
@@ -379,21 +380,21 @@ if isDebugEnabled then d("<<ABORT - Kits count is 0") end
 					--First slot to check?
 					if checkNextSlotDelay == 0 then
 
-if isDebugEnabled then d(">> ???????????????????????????????????????")
-	d(">>Repair check slot no delay: " ..tostring(slot) .. " - " .. GetItemLink(BAG_WORN, slot)) end
+						if isDebugEnabled then d(">> ???????????????????????????????????????")
+							d(">>Repair check, no delay, slot: " ..tostring(slot) .. "(".._slotText[slot]..")-" .. GetItemLink(BAG_WORN, slot)) end
 						if not wasCrownRepairKitUsed and not abortedDueToDeath then
 							--Prevent the repair try if a crown store repair kit was used already
 							total, wasCrownRepairKitUsed, kitWasUsed, abortedDueToDeath, newCondition = REPAIR.RepairItem(BAG_WORN, slot, kits, minConditionPercent)
 							--A repair kit was used?
 							if not abortedDueToDeath and kitWasUsed then
 								--Update the crown repair kit used flag
-								if wasCrownRepairKitUsed then
-if isDebugEnabled then d("<<break loop -> Crown repair kit used") end
+								if wasCrownRepairKitUsed == true then
+									if isDebugEnabled then d("<<break loop -> Crown repair kit used") end
 									totalDelay = 0
 									break --leave the loop
 								end
 							elseif abortedDueToDeath then
-if isDebugEnabled then d("<<break loop -> Dead") end
+								if isDebugEnabled then d("<<break loop -> Dead") end
 								totalDelay = 0
 								break --leave the loop
 							end
@@ -404,19 +405,21 @@ if isDebugEnabled then d("<<break loop -> Dead") end
 								chatOutputStr = (chatOutputStr or GetString(ARC_CHATOUTPUT_REPAIRED))..((chatOutputStr and ", ") or "")..ARC_GetEquipSlotText(slot).." (+"..tostring(round(total,2)).." = " .. tostring(round(newCondition,2)) .. " %)"
 							end
 						else
-if isDebugEnabled then d("<<break loop -> Dead or crown repair kit used") end
+							if isDebugEnabled then d("<<break loop -> Dead or crown repair kit used") end
 							totalDelay = 0
 							break --leave the loop
 						end
-if isDebugEnabled then d("<< ???????????????????????????????????????") end
+						if isDebugEnabled then d("<< ???????????????????????????????????????") end
 
 					else
+						if isDebugEnabled then d("~~~> Registering repair check with delay: " ..tostring(checkNextSlotDelay)) end
+						local currentLoopDelay = checkNextSlotDelay
 
 						--All other further slots to check
 						--Delay each slot check by the milliseconds repair delay chosen in the settings menu
 						zo_callLater(function()
-if isDebugEnabled then d(">> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-		d(">>Repair check further slot: " ..tostring(slot) .. " - " .. GetItemLink(BAG_WORN, slot)) end
+							if isDebugEnabled then d(">> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+								d(">>Repair check, delayed by "..tostring(currentLoopDelay)..", next slot: " ..tostring(slot) .. "(".._slotText[slot]..")-" .. GetItemLink(BAG_WORN, slot)) end
 							--Prevent the repair try if a crown store repair kit was used already
 							if not wasCrownRepairKitUsed and not abortedDueToDeath then
 								total, wasCrownRepairKitUsed, kitWasUsed, abortedDueToDeath, newCondition = REPAIR.RepairItem(BAG_WORN, slot, kits, minConditionPercent)
@@ -424,17 +427,17 @@ if isDebugEnabled then d(">> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 								if not abortedDueToDeath and kitWasUsed then
 									--Update the crown repair kit used flag
 									if wasCrownRepairKitUsed then
-if isDebugEnabled then d("<<return delayed call -> Crown repair kit used") end
+										if isDebugEnabled then d("<<return delayed call -> Crown repair kit used") end
 										totalDelay = 0
 										return --end zo_callLater function
 									end
 								elseif abortedDueToDeath then
-if isDebugEnabled then d("<<return delayed call -> Dead") end
+									if isDebugEnabled then d("<<return delayed call -> Dead") end
 									totalDelay = 0
 									return --end zo_callLater function
 								end
 							else
-if isDebugEnabled then d("<<return delayed call -> Dead or crown repair kit used") end
+								if isDebugEnabled then d("<<return delayed call -> Dead or crown repair kit used") end
 								totalDelay = 0
 								return --end zo_callLater function
 							end
@@ -444,7 +447,7 @@ if isDebugEnabled then d("<<return delayed call -> Dead or crown repair kit used
 							if not abortedDueToDeath and chatOutput and not wasCrownRepairKitUsed and total > 0 and kitWasUsed then
 								chatOutputStr = (chatOutputStr or GetString(ARC_CHATOUTPUT_REPAIRED))..((chatOutputStr and ", ") or "")..ARC_GetEquipSlotText(slot).." (+"..tostring(round(total,2)).." = " .. tostring(round(newCondition,2)) .. " %)"
 							end
-if isDebugEnabled then d("<< !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!") end
+							if isDebugEnabled then d("<< !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!") end
 						end, checkNextSlotDelay)
 
 					end
@@ -455,6 +458,10 @@ if isDebugEnabled then d("<< !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!") end
 					--Update the total delay for the further checks and the chat output
 					totalDelay = checkNextSlotDelay
 
+				else
+					if isDebugEnabled then d(">> 00000000000000000000000000000")
+						d(">>Non equipped item, slot: " ..tostring(slot) .. "(".._slotText[slot]..")")
+  					end
 				end
 
 				--Slot to check was checked, abort other slot checks
@@ -480,7 +487,7 @@ if isDebugEnabled then d(">total delay: " ..tostring(totalDelay)) end
 		totalDelay = totalDelay + 25 --add a small delay before the chat output
 		--Do the other chat output now
 		zo_callLater(function()
-			local isDebugEnabled = Recharge.debug
+			isDebugEnabled = Recharge.debug
 if isDebugEnabled then d(">>0000000000 Delayed chatOutput 0000000000000") end
 			--Was a crown store repair kit used?
 			-->Show the chat output for it as it was not done already above!
@@ -534,6 +541,9 @@ if Recharge.debug then d(">>delayed call 4 - reset the repair prevention variabl
 		resetRepair()
 	end, totalDelay)
 end
+Recharge.ARC_RepairEquipped = ARC_RepairEquipped
+
+
 
 local function ARC_CombatStateChanged(eventCode, inCombat)
 if Recharge.debug then d("=========================================================")
@@ -723,8 +733,10 @@ end
 
 local function ARC_Open_Store()
 	local settings = Recharge.settings
-    if settings.alertRepairKitsEmptyOnVendorOpen then
+	if Recharge.debug then d("[ARC_Open_Store]Alert on open: " ..tostring(settings.alertRepairKitsEmptyOnVendorOpen)) end
+    if settings.alertRepairKitsEmptyOnVendorOpen == true then
 		local kitsCount = ARC_GetRepairKitsCount()
+		if Recharge.debug then d(">kitsCount: " ..tostring(kitsCount)) end
 		ARC_checkThresholdOrEmpty("repairKits", kitsCount == 0, kitsCount)
     end
 
