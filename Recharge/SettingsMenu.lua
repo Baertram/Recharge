@@ -280,6 +280,25 @@ local function ARC_BuildAddonMenu()
 		},
 		{
 			type = "checkbox",
+			name = GetString(ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_LOGIN),
+			tooltip = GetString(ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_LOGIN_TT),
+			getFunc = function() return ARC_settings.alertRepairKitsEmptyOnLogin end,
+			setFunc = function(value) ARC_settings.alertRepairKitsEmptyOnLogin = value end,
+            default = ARC_defSettings.alertRepairKitsEmptyOnLogin,
+            width="full",
+		},
+		{
+			type = "checkbox",
+			name = GetString(ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_VENDOR),
+			tooltip = GetString(ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_VENDOR_TT),
+			getFunc = function() return ARC_settings.alertRepairKitsEmptyOnVendorOpen end,
+			setFunc = function(value) ARC_settings.alertRepairKitsEmptyOnVendorOpen = value end,
+            default = ARC_defSettings.alertRepairKitsEmptyOnVendorOpen,
+            width="full",
+		},
+
+		{
+			type = "checkbox",
 			name = GetString(ARC_LAM_OPTION_ALERT_SOON_EMPTY_REPAIRKIT),
 			tooltip = GetString(ARC_LAM_OPTION_ALERT_SOON_EMPTY_REPAIRKIT_TT),
 			getFunc = function() return ARC_settings.alertRepairKitsSoonEmpty end,
@@ -300,26 +319,29 @@ local function ARC_BuildAddonMenu()
  				end,
             width="half",
 			default = ARC_defSettings.alertRepairKitsSoonEmptyThreshold,
-            disabled = function() return not ARC_settings.alertRepairKitsSoonEmpty and not ARC_settings.alertRepairKitsEmptyOnLogin end,
+            disabled = function() return not ARC_settings.alertRepairKitsSoonEmpty end,
 		},
 		{
 			type = "checkbox",
-			name = GetString(ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_LOGIN),
-			tooltip = GetString(ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_LOGIN_TT),
-			getFunc = function() return ARC_settings.alertRepairKitsEmptyOnLogin end,
-			setFunc = function(value) ARC_settings.alertRepairKitsEmptyOnLogin = value end,
-            default = ARC_defSettings.alertRepairKitsEmptyOnLogin,
+			name = GetString(ARC_LAM_OPTION_ALERT_RELOADUI_LOGIN_ZONING),
+			tooltip = GetString(ARC_LAM_OPTION_ALERT_RELOADUI_LOGIN_ZONING_TT),
+			getFunc = function() return ARC_settings.alertRepairKitsSoonEmptyOnLogin end,
+			setFunc = function(value) ARC_settings.alertRepairKitsSoonEmptyOnLogin = value end,
+            default = ARC_defSettings.alertRepairKitsSoonEmptyOnLogin,
+			disabled = function() return not ARC_settings.alertRepairKitsSoonEmpty end,
             width="full",
 		},
 		{
 			type = "checkbox",
-			name = GetString(ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_VENDOR),
-			tooltip = GetString(ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_VENDOR_TT),
-			getFunc = function() return ARC_settings.alertRepairKitsEmptyOnVendorOpen end,
-			setFunc = function(value) ARC_settings.alertRepairKitsEmptyOnVendorOpen = value end,
-            default = ARC_defSettings.alertRepairKitsEmptyOnVendorOpen,
+			name = GetString(ARC_LAM_OPTION_ALERT_VENDOR),
+			tooltip = GetString(ARC_LAM_OPTION_ALERT_VENDOR_TT),
+			getFunc = function() return ARC_settings.alertRepairKitsSoonEmptyOnVendorOpen end,
+			setFunc = function(value) ARC_settings.alertRepairKitsSoonEmptyOnVendorOpen = value end,
+            default = ARC_defSettings.alertRepairKitsSoonEmptyOnVendorOpen,
+			disabled = function() return not ARC_settings.alertRepairKitsSoonEmpty end,
             width="full",
 		},
+
 
 		{
 			type = "checkbox",
@@ -339,6 +361,15 @@ local function ARC_BuildAddonMenu()
             default = ARC_defSettings.alertSoulGemsSoonEmpty,
             width="half",
 		},
+		{
+			type = "checkbox",
+			name = GetString(ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_LOGIN),
+			tooltip = GetString(ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_LOGIN_TT),
+			getFunc = function() return ARC_settings.alertSoulGemsEmptyOnLogin end,
+			setFunc = function(value) ARC_settings.alertSoulGemsEmptyOnLogin = value end,
+            default = ARC_defSettings.alertSoulGemsEmptyOnLogin,
+            width="full",
+		},
  		{
 			type = "slider",
 			name = GetString(ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_TH),
@@ -347,20 +378,21 @@ local function ARC_BuildAddonMenu()
 			max = 100,
 			getFunc = function() return ARC_settings.alertSoulGemsSoonEmptyThreshold end,
 			setFunc = function(value)
-						ARC_settings.alertSoulGemsSoonEmptyThreshold = value
-						if ARC_settings.chatOutput then println(GetString(ARC_CHATOUPUT_SOULGEMS_EMPTY_THRESHOLD),tostring(value)) end
- 				end,
+				ARC_settings.alertSoulGemsSoonEmptyThreshold = value
+				if ARC_settings.chatOutput then println(GetString(ARC_CHATOUPUT_SOULGEMS_EMPTY_THRESHOLD),tostring(value)) end
+			end,
             width="half",
 			default = ARC_defSettings.alertSoulGemsSoonEmptyThreshold,
-            disabled = function() return not ARC_settings.alertSoulGemsSoonEmpty and not ARC_settings.alertSoulGemsEmptyOnLogin end,
+            disabled = function() return not ARC_settings.alertSoulGemsSoonEmpty end,
 		},
 		{
 			type = "checkbox",
-			name = GetString(ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_LOGIN),
-			tooltip = GetString(ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_LOGIN_TT),
-			getFunc = function() return ARC_settings.alertSoulGemsEmptyOnLogin end,
-			setFunc = function(value) ARC_settings.alertSoulGemsEmptyOnLogin = value end,
-            default = ARC_defSettings.alertSoulGemsEmptyOnLogin,
+			name = GetString(ARC_LAM_OPTION_ALERT_RELOADUI_LOGIN_ZONING),
+			tooltip = GetString(ARC_LAM_OPTION_ALERT_RELOADUI_LOGIN_ZONING_TT),
+			getFunc = function() return ARC_settings.alertSoulGemsSoonEmptyOnLogin end,
+			setFunc = function(value) ARC_settings.alertSoulGemsSoonEmptyOnLogin = value end,
+            default = ARC_defSettings.alertSoulGemsSoonEmptyOnLogin,
+			disabled = function() return not ARC_settings.alertSoulGemsSoonEmpty end,
             width="full",
 		},
 

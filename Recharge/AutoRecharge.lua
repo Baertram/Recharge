@@ -1,6 +1,6 @@
 local addonName = "Auto%sRecharge"
 Recharge = {
-	version				= "2.76",
+	version				= "2.77",
     author				= "XanDDemoX, current: Baertram",
     name				= string.format(addonName, " "),
     displayName			= string.format(addonName, " "),
@@ -56,9 +56,10 @@ Recharge.defaultSettings = {
 	chargeDuringCombat					= false,
     minChargePercent					= 0,
     alertSoulGemsEmpty					= false,
+    alertSoulGemsEmptyOnLogin			= true,
     alertSoulGemsSoonEmpty				= false,
     alertSoulGemsSoonEmptyThreshold		= 20,
-    alertSoulGemsEmptyOnLogin			= true,
+	alertSoulGemsSoonEmptyOnLogin		= false,
 	chargeOnWeaponChange				= false,
 	chargeOnWeaponChangeOnlyInCombat	= true,
 
@@ -67,9 +68,12 @@ Recharge.defaultSettings = {
 	repairDuringCombat					= false,
     minConditionPercent					= 0,
     alertRepairKitsEmpty				= false,
-    alertRepairKitsSoonEmpty			= false,
-    alertRepairKitsSoonEmptyThreshold	= 10,
     alertRepairKitsEmptyOnLogin			= true,
+	alertRepairKitsEmptyOnVendorOpen	= false,
+	alertRepairKitsSoonEmpty			= false,
+    alertRepairKitsSoonEmptyThreshold	= 10,
+	alertRepairKitsSoonEmptyOnLogin		= false,
+	alertRepairKitsSoonEmptyOnVendorOpen = false,
 
     showRepairKitsLeftAtVendor			= false,
     useRepairKitForItemLevel            = false,
@@ -199,7 +203,7 @@ local function ARC_checkThresholdOrEmpty(checkType, emptyOrThreshold, amount)
             end
         end
     elseif 	checkType == "soulGems" then
-    	if emptyOrThreshold then
+    	if emptyOrThreshold == true then
             if amount == 0 then
                 ARC_showAlertMessage("soulGemsEmpty")
             end
@@ -734,10 +738,17 @@ end
 local function ARC_Open_Store()
 	local settings = Recharge.settings
 	if Recharge.debug then d("[ARC_Open_Store]Alert on open: " ..tostring(settings.alertRepairKitsEmptyOnVendorOpen)) end
-    if settings.alertRepairKitsEmptyOnVendorOpen == true then
+
+	local alertRepairKitsEmptyOnVendorOpen = settings.alertRepairKitsEmptyOnVendorOpen
+	local alertRepairKitsSoonEmptyOnVendorOpen = settings.alertRepairKitsSoonEmptyOnVendorOpen
+	if alertRepairKitsEmptyOnVendorOpen == true or alertRepairKitsSoonEmptyOnVendorOpen == true then
 		local kitsCount = ARC_GetRepairKitsCount()
 		if Recharge.debug then d(">kitsCount: " ..tostring(kitsCount)) end
-		ARC_checkThresholdOrEmpty("repairKits", kitsCount == 0, kitsCount)
+		local emptyOrThresHold = kitsCount == 0
+		if alertRepairKitsSoonEmptyOnVendorOpen == true then
+			emptyOrThresHold = false -- Show the soon empty message if relevant!
+		end
+		ARC_checkThresholdOrEmpty("repairKits", emptyOrThresHold, kitsCount)
     end
 
     if settings.showRepairKitsLeftAtVendor then
@@ -911,14 +922,29 @@ local function ARC_Player_Activated(...)
 		EVENT_MANAGER:RegisterForEvent(eventName, EVENT_ACTIVE_WEAPON_PAIR_CHANGED, OnActiveWeaponPairChanged)
 	end
 
-    if settings.alertSoulGemsEmptyOnLogin then
+	--Soul gems check
+    local alertSoulGemsEmptyOnLogin = settings.alertSoulGemsEmptyOnLogin
+	local alertSoulGamesSoonEmptyOnLogin = settings.alertSoulGamesSoonEmptyOnLogin
+	if alertSoulGemsEmptyOnLogin == true or alertSoulGamesSoonEmptyOnLogin == true then
 		local gemsCount = ARC_GetSoulGemsCount()
-		ARC_checkThresholdOrEmpty("soulGems", gemsCount == 0, gemsCount)
+		local emptyOrThresHold = gemsCount == 0
+		if alertSoulGamesSoonEmptyOnLogin == true then
+			emptyOrThresHold = false --do not only check empty kits, but threshold too!
+		end
+		ARC_checkThresholdOrEmpty("soulGems", emptyOrThresHold, gemsCount)
     end
-    if settings.alertRepairKitsEmptyOnLogin then
+
+	--Repair kits check
+    local alertRepairKitsEmptyOnLogin = settings.alertRepairKitsEmptyOnLogin
+	local alertRepairKitsSoonEmptyOnLogin = settings.alertRepairKitsSoonEmptyOnLogin
+	if alertRepairKitsEmptyOnLogin == true or alertRepairKitsSoonEmptyOnLogin == true then
 		local kitsCount = ARC_GetRepairKitsCount()
-		ARC_checkThresholdOrEmpty("repairKits", kitsCount == 0, kitsCount)
-    end
+		local emptyOrThresHold = kitsCount == 0
+		if alertRepairKitsSoonEmptyOnLogin == true then
+			emptyOrThresHold = false --do not only check empty kits, but threshold too!
+		end
+		ARC_checkThresholdOrEmpty("repairKits", emptyOrThresHold, kitsCount)
+	end
 end
 
 local function ARC_Loaded(eventCode, addOnName)

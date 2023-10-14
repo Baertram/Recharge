@@ -23,9 +23,9 @@ local strings = {
 	ARC_LAM_OPTION_SUPPRESS_CHAT_MSG_NOTHING			= "Suppress 'Nothing ...' messages",
 	ARC_LAM_OPTION_SUPPRESS_CHAT_MSG_NOTHING_TT		= "Do not show the 'Charged nothing' or 'Repaired nothing' messages",
 	ARC_LAM_HEADER_ALERT 							= "Onscreen messages",
-	ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT				= "Shows 'Repair kit empty' alert",
+	ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT				= "Show 'Repair kit empty' alert",
 	ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_TT			= "Shows onscreen alert message if your repair kits are empty",
-	ARC_LAM_OPTION_ALERT_SOON_EMPTY_REPAIRKIT		= "Shows 'Repair kit soon empty' alert",
+	ARC_LAM_OPTION_ALERT_SOON_EMPTY_REPAIRKIT		= "Show 'Repair kit soon empty' alert",
 	ARC_LAM_OPTION_ALERT_SOON_EMPTY_REPAIRKIT_TT		= "Shows onscreen alert message if your repair kits amount drops below a threshold.\n\nSet your threshold at the slider to the right!",
 	ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_TH			= "Repair kits threshold",
 	ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_TH_TT		= "Set a value between 1 and 100 repair kits. If you leave combat and your repair kits drop below this value you'll get an onscreen alert message.",
@@ -33,9 +33,9 @@ local strings = {
 	ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_LOGIN_TT	= "As you login or do a reloadui:\nShow onscreen alert message if your Repair kits amount drops below the chosen threshold or is already 0.",
 	ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_VENDOR		= "Shows 'Repair kits' alert at vendor",
 	ARC_LAM_OPTION_ALERT_EMPTY_REPAIRKIT_VENDOR_TT	= "As you open a vendor:\nShow onscreen alert message if your Repair kits amount drops below the chosen threshold or is already 0.",
-	ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM				= "Shows '" .. GetString(SI_ITEMTYPE19) .. " empty' alert",
+	ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM				= "Show '" .. GetString(SI_ITEMTYPE19) .. " empty' alert",
 	ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_TT			= "Shows onscreen alert message if your Soul gems are empty",
-	ARC_LAM_OPTION_ALERT_SOON_EMPTY_SOULGEM			= "Shows '" .. GetString(SI_ITEMTYPE19) .. " empty soon' alert",
+	ARC_LAM_OPTION_ALERT_SOON_EMPTY_SOULGEM			= "Show '" .. GetString(SI_ITEMTYPE19) .. " empty soon' alert",
 	ARC_LAM_OPTION_ALERT_SOON_EMPTY_SOULGEM_TT		= "Shows onscreen alert message if your Soul gems amount drops below a threshold.\n\nSet your threshold at the slider to the right!",
 	ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_TH			= GetString(SI_ITEMTYPE19) .. " threshold",
 	ARC_LAM_OPTION_ALERT_EMPTY_SOULGEM_TH_TT			= "Set a value between 1 and 100 Soul gems. If you leave combat and your Soul gems drop below this value you'll get an onscreen alert message.",
@@ -52,7 +52,6 @@ local strings = {
 	ARC_LAM_OPTION_USE_CROWN_STORE_SOULGEMS_FIRST = "Crown soulgems first",
 	ARC_LAM_OPTION_USE_CROWN_STORE_SOULGEMS_FIRST_TT = "Use the Crown Store soulgemns first, and if noone is left use the normal soulgems",
 
-
 	ARC_LAM_OPTION_AUTO_RECHARGE_IN_COMBAT			= "Recharge in combat",
 	ARC_LAM_OPTION_AUTO_RECHARGE_IN_COMBAT_TT		= "Automatically recharge your weapons also during the combat",
 	ARC_LAM_OPTION_AUTO_RECHARGE_ON_WEAPON_PAIR_CHANGE		= "Recharge on weapon change",
@@ -61,6 +60,11 @@ local strings = {
 	ARC_LAM_OPTION_AUTO_RECHARGE_ON_WEAPON_PAIR_CHANGE_ONLY_IN_COMBAT_TT = "Do the recharge on weapon change check only if you are in combat",
 	ARC_LAM_OPTION_AUTO_REPAIR_IN_COMBAT				= "Repair in combat",
 	ARC_LAM_OPTION_AUTO_REPAIR_IN_COMBAT_TT		   	= "Automatically repair your armour also during the combat",
+
+	ARC_LAM_OPTION_ALERT_RELOADUI_LOGIN_ZONING 		= "Only at login/reloadUI/zoning",
+	ARC_LAM_OPTION_ALERT_RELOADUI_LOGIN_ZONING_TT	= "Show the alert only if you login, do a /reloadui or change zones (where a loading screen appears)",
+	ARC_LAM_OPTION_ALERT_VENDOR						= "Show alert at vendor",
+	ARC_LAM_OPTION_ALERT_VENDOR_TT					= "As you open a vendor:\nShow onscreen alert message.",
 
 --Chat output messages
 	ARC_CHATOUTPUT_CHARGED							= GetString(SI_ITEMTRAITTYPE2) .. ": ",
