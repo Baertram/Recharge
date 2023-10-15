@@ -528,7 +528,8 @@ if isDebugEnabled then d("<<0000000000 Delayed chatOutput 0000000000000") end
 	end
 
 	--Do the "repair kits soon empty checks" delayed, after chat output was done (if enabled)
-	if not inCombat and settings.alertRepairKitsSoonEmpty then
+	-->but only if the "soon empty" warning should not only show at login/reloadui/zoning!
+	if not inCombat and settings.alertRepairKitsSoonEmpty and not settings.alertRepairKitsSoonEmptyOnLogin then
 		totalDelay = totalDelay + 10 --add 10 milliseconds
 		zo_callLater(function()
 if Recharge.debug then d(">>delayed call 3 - repair kits left output") end
