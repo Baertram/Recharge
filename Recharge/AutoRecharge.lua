@@ -911,7 +911,7 @@ local function OnActiveWeaponPairChanged(eventId, activeWeaponPair, locked)
 end
 
 local function ARC_Player_Activated(...)
-	EVENT_MANAGER:UnregisterForEvent(eventName, EVENT_PLAYER_ACTIVATED)
+	--EVENT_MANAGER:UnregisterForEvent(eventName, EVENT_PLAYER_ACTIVATED)
 	local settings = Recharge.settings
 	isPlayerCurrentlyDead = IsUnitDead(PLAYER)
 	Recharge.noChargeChangeEvents = {}
