@@ -1,6 +1,6 @@
 local addonName = "Auto%sRecharge"
 Recharge = {
-	version				= "2.76",
+	version				= "2.79",
     author				= "XanDDemoX, current: Baertram",
     name				= string.format(addonName, " "),
     displayName			= string.format(addonName, " "),
@@ -56,9 +56,10 @@ Recharge.defaultSettings = {
 	chargeDuringCombat					= false,
     minChargePercent					= 0,
     alertSoulGemsEmpty					= false,
+    alertSoulGemsEmptyOnLogin			= true,
     alertSoulGemsSoonEmpty				= false,
     alertSoulGemsSoonEmptyThreshold		= 20,
-    alertSoulGemsEmptyOnLogin			= true,
+	alertSoulGemsSoonEmptyOnLogin		= false,
 	chargeOnWeaponChange				= false,
 	chargeOnWeaponChangeOnlyInCombat	= true,
 
@@ -67,9 +68,12 @@ Recharge.defaultSettings = {
 	repairDuringCombat					= false,
     minConditionPercent					= 0,
     alertRepairKitsEmpty				= false,
-    alertRepairKitsSoonEmpty			= false,
-    alertRepairKitsSoonEmptyThreshold	= 10,
     alertRepairKitsEmptyOnLogin			= true,
+	alertRepairKitsEmptyOnVendorOpen	= false,
+	alertRepairKitsSoonEmpty			= false,
+    alertRepairKitsSoonEmptyThreshold	= 10,
+	alertRepairKitsSoonEmptyOnLogin		= false,
+	alertRepairKitsSoonEmptyOnVendorOpen = false,
 
     showRepairKitsLeftAtVendor			= false,
     useRepairKitForItemLevel            = false,
@@ -199,7 +203,7 @@ local function ARC_checkThresholdOrEmpty(checkType, emptyOrThreshold, amount)
             end
         end
     elseif 	checkType == "soulGems" then
-    	if emptyOrThreshold then
+    	if emptyOrThreshold == true then
             if amount == 0 then
                 ARC_showAlertMessage("soulGemsEmpty")
             end
@@ -245,21 +249,22 @@ end
 
 local function ARC_ChargeEquipped(chatOutput, inCombat, slotIndex)
 	CHARGE = CHARGE or Recharge.Charge
-
 	chatOutput = chatOutput or false
-	local settings = Recharge.settings
 	local abortedDueToDeath = ARC_IsPlayerDead()
 	--Do not go on if the player is dead
 	if abortedDueToDeath then return end
 
+	local settings = Recharge.settings
 	local gemsCount, gems = ARC_GetSoulGemsCount()
 	if gemsCount == 0 then
-		if chatOutput and settings.alertSoulGemsEmpty  and not settings.chatOutputSuppressNothingMessages then
-			println(GetString(ARC_ALERT_SOULGEMS_EMPTY))
+		if settings.alertSoulGemsEmpty then
+			if chatOutput  and not settings.chatOutputSuppressNothingMessages then
+				println(GetString(ARC_ALERT_SOULGEMS_EMPTY))
+			end
+			if not inCombat then
+				ARC_checkThresholdOrEmpty("soulGems", true, gemsCount)
+			end
 		end
-		if not inCombat and settings.alertSoulGemsEmpty then
-            ARC_checkThresholdOrEmpty("soulGems", true, gemsCount)
-        end
 		return
 	end
 
@@ -302,7 +307,7 @@ local function ARC_ChargeEquipped(chatOutput, inCombat, slotIndex)
 		println(GetString(ARC_CHATOUPUT_NO_CHARGEABLE_WEAPONS))
 	end
 
-	if not inCombat and settings.alertSoulGemsSoonEmpty then
+	if not inCombat and settings.alertSoulGemsSoonEmpty and not settings.alertSoulGemsSoonEmptyOnLogin then
         ARC_checkThresholdOrEmpty("soulGems", false, gemsCount)
 	end
 end
@@ -524,7 +529,8 @@ if isDebugEnabled then d("<<0000000000 Delayed chatOutput 0000000000000") end
 	end
 
 	--Do the "repair kits soon empty checks" delayed, after chat output was done (if enabled)
-	if not inCombat and settings.alertRepairKitsSoonEmpty then
+	-->but only if the "soon empty" warning should not only show at login/reloadui/zoning!
+	if not inCombat and settings.alertRepairKitsSoonEmpty and not settings.alertRepairKitsSoonEmptyOnLogin then
 		totalDelay = totalDelay + 10 --add 10 milliseconds
 		zo_callLater(function()
 if Recharge.debug then d(">>delayed call 3 - repair kits left output") end
@@ -734,10 +740,17 @@ end
 local function ARC_Open_Store()
 	local settings = Recharge.settings
 	if Recharge.debug then d("[ARC_Open_Store]Alert on open: " ..tostring(settings.alertRepairKitsEmptyOnVendorOpen)) end
-    if settings.alertRepairKitsEmptyOnVendorOpen == true then
+
+	local alertRepairKitsEmptyOnVendorOpen = settings.alertRepairKitsEmptyOnVendorOpen
+	local alertRepairKitsSoonEmptyOnVendorOpen = settings.alertRepairKitsSoonEmptyOnVendorOpen
+	if alertRepairKitsEmptyOnVendorOpen == true or alertRepairKitsSoonEmptyOnVendorOpen == true then
 		local kitsCount = ARC_GetRepairKitsCount()
 		if Recharge.debug then d(">kitsCount: " ..tostring(kitsCount)) end
-		ARC_checkThresholdOrEmpty("repairKits", kitsCount == 0, kitsCount)
+		local emptyOrThresHold = kitsCount == 0
+		if alertRepairKitsSoonEmptyOnVendorOpen == true then
+			emptyOrThresHold = false -- Show the soon empty message if relevant!
+		end
+		ARC_checkThresholdOrEmpty("repairKits", emptyOrThresHold, kitsCount)
     end
 
     if settings.showRepairKitsLeftAtVendor then
@@ -899,7 +912,7 @@ local function OnActiveWeaponPairChanged(eventId, activeWeaponPair, locked)
 end
 
 local function ARC_Player_Activated(...)
-	EVENT_MANAGER:UnregisterForEvent(eventName, EVENT_PLAYER_ACTIVATED)
+	--EVENT_MANAGER:UnregisterForEvent(eventName, EVENT_PLAYER_ACTIVATED)
 	local settings = Recharge.settings
 	isPlayerCurrentlyDead = IsUnitDead(PLAYER)
 	Recharge.noChargeChangeEvents = {}
@@ -911,14 +924,29 @@ local function ARC_Player_Activated(...)
 		EVENT_MANAGER:RegisterForEvent(eventName, EVENT_ACTIVE_WEAPON_PAIR_CHANGED, OnActiveWeaponPairChanged)
 	end
 
-    if settings.alertSoulGemsEmptyOnLogin then
+	--Soul gems check
+    local alertSoulGemsEmptyOnLogin     = settings.alertSoulGemsEmptyOnLogin
+	local alertSoulGemsSoonEmptyOnLogin = settings.alertSoulGemsSoonEmptyOnLogin
+	if alertSoulGemsEmptyOnLogin == true or alertSoulGemsSoonEmptyOnLogin == true then
 		local gemsCount = ARC_GetSoulGemsCount()
-		ARC_checkThresholdOrEmpty("soulGems", gemsCount == 0, gemsCount)
+		local emptyOrThresHold = gemsCount == 0
+		if alertSoulGemsSoonEmptyOnLogin == true then
+			emptyOrThresHold = false --do not only check empty soulgems, but threshold too!
+		end
+		ARC_checkThresholdOrEmpty("soulGems", emptyOrThresHold, gemsCount)
     end
-    if settings.alertRepairKitsEmptyOnLogin then
+
+	--Repair kits check
+    local alertRepairKitsEmptyOnLogin = settings.alertRepairKitsEmptyOnLogin
+	local alertRepairKitsSoonEmptyOnLogin = settings.alertRepairKitsSoonEmptyOnLogin
+	if alertRepairKitsEmptyOnLogin == true or alertRepairKitsSoonEmptyOnLogin == true then
 		local kitsCount = ARC_GetRepairKitsCount()
-		ARC_checkThresholdOrEmpty("repairKits", kitsCount == 0, kitsCount)
-    end
+		local emptyOrThresHold = kitsCount == 0
+		if alertRepairKitsSoonEmptyOnLogin == true then
+			emptyOrThresHold = false --do not only check empty kits, but threshold too!
+		end
+		ARC_checkThresholdOrEmpty("repairKits", emptyOrThresHold, kitsCount)
+	end
 end
 
 local function ARC_Loaded(eventCode, addOnName)

@@ -55,6 +55,11 @@ local strings = {
 	ARC_LAM_OPTION_USE_CROWN_STORE_SOULGEMS_FIRST = "Kronen Seelensteine zuerst",
 	ARC_LAM_OPTION_USE_CROWN_STORE_SOULGEMS_FIRST_TT = "Verwende die Kronenshop Seelensteine zuerst, und wenn keine mehr da sind verwende die normalen Seelensteine",
 
+	ARC_LAM_OPTION_ALERT_RELOADUI_LOGIN_ZONING 		= "Nur beim Login/reloadUI/Zonenwechsel",
+	ARC_LAM_OPTION_ALERT_RELOADUI_LOGIN_ZONING_TT	= "Zeigt die Warnung nur an wenn du dich einloggst, die Benutzeroberfläche neu lädst oder bei einem Zonenwechsel (mit Ladebildschirm)",
+	ARC_LAM_OPTION_ALERT_VENDOR						= "Zeige Warnung beim Händler an",
+	ARC_LAM_OPTION_ALERT_VENDOR_TT					= "Wenn du den Händler öffnest:\nZeige eine Warnung auf dem Bildschirm an",
+
 	--Chat output messages
 	ARC_CHATOUTPUT_CHARGED							= GetString(SI_ITEMTRAITTYPE2) .. ": ",
 	ARC_CHATOUTPUT_CHARGED_NOTHING	   				= zo_strformat("Nichts <<c:1>>:", GetString(SI_ITEMTRAITTYPE2)),
