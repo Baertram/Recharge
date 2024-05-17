@@ -1,6 +1,6 @@
 local addonName = "Auto%sRecharge"
 Recharge = {
-	version				= "2.77",
+	version				= "2.79",
     author				= "XanDDemoX, current: Baertram",
     name				= string.format(addonName, " "),
     displayName			= string.format(addonName, " "),
@@ -249,21 +249,22 @@ end
 
 local function ARC_ChargeEquipped(chatOutput, inCombat, slotIndex)
 	CHARGE = CHARGE or Recharge.Charge
-
 	chatOutput = chatOutput or false
-	local settings = Recharge.settings
 	local abortedDueToDeath = ARC_IsPlayerDead()
 	--Do not go on if the player is dead
 	if abortedDueToDeath then return end
 
+	local settings = Recharge.settings
 	local gemsCount, gems = ARC_GetSoulGemsCount()
 	if gemsCount == 0 then
-		if chatOutput and settings.alertSoulGemsEmpty  and not settings.chatOutputSuppressNothingMessages then
-			println(GetString(ARC_ALERT_SOULGEMS_EMPTY))
+		if settings.alertSoulGemsEmpty then
+			if chatOutput  and not settings.chatOutputSuppressNothingMessages then
+				println(GetString(ARC_ALERT_SOULGEMS_EMPTY))
+			end
+			if not inCombat then
+				ARC_checkThresholdOrEmpty("soulGems", true, gemsCount)
+			end
 		end
-		if not inCombat and settings.alertSoulGemsEmpty then
-            ARC_checkThresholdOrEmpty("soulGems", true, gemsCount)
-        end
 		return
 	end
 
@@ -306,7 +307,7 @@ local function ARC_ChargeEquipped(chatOutput, inCombat, slotIndex)
 		println(GetString(ARC_CHATOUPUT_NO_CHARGEABLE_WEAPONS))
 	end
 
-	if not inCombat and settings.alertSoulGemsSoonEmpty then
+	if not inCombat and settings.alertSoulGemsSoonEmpty and not settings.alertSoulGemsSoonEmptyOnLogin then
         ARC_checkThresholdOrEmpty("soulGems", false, gemsCount)
 	end
 end
@@ -924,13 +925,13 @@ local function ARC_Player_Activated(...)
 	end
 
 	--Soul gems check
-    local alertSoulGemsEmptyOnLogin = settings.alertSoulGemsEmptyOnLogin
-	local alertSoulGamesSoonEmptyOnLogin = settings.alertSoulGamesSoonEmptyOnLogin
-	if alertSoulGemsEmptyOnLogin == true or alertSoulGamesSoonEmptyOnLogin == true then
+    local alertSoulGemsEmptyOnLogin     = settings.alertSoulGemsEmptyOnLogin
+	local alertSoulGemsSoonEmptyOnLogin = settings.alertSoulGemsSoonEmptyOnLogin
+	if alertSoulGemsEmptyOnLogin == true or alertSoulGemsSoonEmptyOnLogin == true then
 		local gemsCount = ARC_GetSoulGemsCount()
 		local emptyOrThresHold = gemsCount == 0
-		if alertSoulGamesSoonEmptyOnLogin == true then
-			emptyOrThresHold = false --do not only check empty kits, but threshold too!
+		if alertSoulGemsSoonEmptyOnLogin == true then
+			emptyOrThresHold = false --do not only check empty soulgems, but threshold too!
 		end
 		ARC_checkThresholdOrEmpty("soulGems", emptyOrThresHold, gemsCount)
     end
